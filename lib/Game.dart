@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_app/bloc/tokenEvent.dart';
+import 'package:quiz_app/bloc/trophyEvent.dart';
+
+import 'Dialoges.dart';
 
 class Game extends StatefulWidget {
+  final List newList;
+  final BlocTrophy _bloc;
+  final BlocToken blocToken;
+  Game(this.newList, this._bloc, this.blocToken);
   @override
   _GameState createState() => _GameState();
 }
 
 class _GameState extends State<Game> {
-  List<Info> dummyList = <Info>[
-    Info(
-        name: "Sports",
-        token: null,
-        url:
-            "https://media.npr.org/assets/img/2020/06/10/gettyimages-200199027-001-b5fb3d8d8469ab744d9e97706fa67bc5c0e4fa40-s1600-c85.jpg"),
-    Info(
-        name: "Culture",
-        token: 10,
-        url: "https://www.greatplacetowork.com/images/ylnpfr6c.png"),
-    Info(
-        name: "History",
-        token: 22,
-        url: "https://www.indiaeducation.net/imagesvr_ce/795/historypic2.jpg"),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    widget.blocToken.tokenEventSink.add(IncrementToken(0));
+    widget.newList.shuffle();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,13 +75,18 @@ class _GameState extends State<Game> {
                   SizedBox(
                     width: size.width / 40,
                   ),
-                  Text(
-                    "25",
-                    style: TextStyle(
-                        color: Colors.purple,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600),
-                  ),
+                  StreamBuilder(
+                      stream: widget.blocToken.token,
+                      initialData: 0,
+                      builder: (BuildContext context, snapshot) {
+                        return Text(
+                          snapshot.data.toString(),
+                          style: TextStyle(
+                              color: Colors.purple,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600),
+                        );
+                      }),
                 ],
               ),
             ),
@@ -125,7 +129,7 @@ class _GameState extends State<Game> {
       height: size.height / 1.5,
       width: size.width,
       child: ListView.builder(
-        itemCount: dummyList.length,
+        itemCount: widget.newList.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.all(12.0),
@@ -142,7 +146,7 @@ class _GameState extends State<Game> {
       elevation: 5,
       color: Colors.white,
       child: Container(
-        height: size.height / 2.5,
+        height: size.height / 2.3,
         width: size.width / 1.05,
         child: Column(
           children: [
@@ -151,57 +155,44 @@ class _GameState extends State<Game> {
               width: size.width / 1.05,
               decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: NetworkImage(dummyList[index].url),
+                      image: NetworkImage(widget.newList[index]['imageUrl']),
                       fit: BoxFit.cover),
                   borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20))),
             ),
             Container(
-              height: size.height / 10,
+              height: size.height / 8,
               width: size.width / 1.05,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Container(
-                      height: size.height / 10,
+                      height: size.height / 8,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            dummyList[index].name,
+                            "Event name : ${widget.newList[index]['name']}",
                             style: TextStyle(
                                 color: Colors.purple,
-                                fontSize: 16,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500),
                           ),
                           SizedBox(
                             height: size.height / 200,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                height: size.height / 30,
-                                width: size.width / 12,
-                                decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                        image: AssetImage('assets/rupee.png'))),
-                              ),
-                              SizedBox(
-                                width: size.width / 100,
-                              ),
-                              Text(
-                                dummyList[index].token == null
-                                    ? "Free"
-                                    : "${dummyList[index].token}",
-                                style: TextStyle(
-                                    color: Colors.purple,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600),
-                              ),
-                            ],
+                          tokensRequired(
+                              size,
+                              widget.newList[index]['token'] == 0
+                                  ? "Charge : Free"
+                                  : "Charge : ${widget.newList[index]['token']}"),
+                          SizedBox(
+                            height: size.height / 200,
                           ),
+                          tokensRequired(size,
+                              "Reward : ${widget.newList[index]['token']}"),
                         ],
                       )),
                   SizedBox(),
@@ -210,7 +201,16 @@ class _GameState extends State<Game> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)),
                     child: Text("Play Now"),
-                    onPressed: () {},
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (_) => PlayWarning(
+                              widget.newList[index]['token'],
+                              widget.newList[index]['name'],
+                              widget.newList[index]['link'],
+                              widget._bloc,
+                              widget.blocToken));
+                    },
                   )
                 ],
               ),
@@ -220,11 +220,36 @@ class _GameState extends State<Game> {
       ),
     );
   }
+
+  Widget tokensRequired(
+    Size size,
+    String show,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          show,
+          style: TextStyle(
+              color: Colors.purple, fontSize: 18, fontWeight: FontWeight.w600),
+        ),
+        SizedBox(
+          width: size.width / 100,
+        ),
+        Container(
+          height: size.height / 30,
+          width: size.width / 12,
+          decoration: BoxDecoration(
+              image: DecorationImage(image: AssetImage('assets/rupee.png'))),
+        ),
+      ],
+    );
+  }
 }
 
 class Info {
-  final String url, name;
+  final String url, name, imageUrl;
   final int token;
 
-  Info({this.url, this.name, this.token});
+  Info({this.url, this.name, this.token, this.imageUrl});
 }
