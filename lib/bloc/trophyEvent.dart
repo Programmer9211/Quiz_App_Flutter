@@ -13,7 +13,7 @@ class Decrement extends TrophyEvent {
 }
 
 class BlocTrophy {
-  int _currentTrophy = 10;
+  int _currentTrophy;
 
   final _trophyStateController = StreamController<int>.broadcast();
 
@@ -27,6 +27,10 @@ class BlocTrophy {
 
   BlocTrophy() {
     _trophyEventController.stream.asBroadcastStream().listen(_trophies);
+  }
+
+  void initialize(trophy) {
+    _currentTrophy = trophy;
   }
 
   void _trophies(TrophyEvent event) {

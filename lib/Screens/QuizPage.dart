@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class QuizPage extends StatefulWidget {
   final String url, name;
   final BlocTrophy bloc;
   final BlocToken blocToken;
-  QuizPage({this.bloc, this.url, this.name, this.blocToken});
+  final SharedPreferences prefs;
+  QuizPage({this.bloc, this.url, this.name, this.blocToken, this.prefs});
   @override
   _QuizPageState createState() => _QuizPageState();
 }
@@ -19,6 +21,7 @@ class _QuizPageState extends State<QuizPage> {
   List<List<String>> answerList = List<List<String>>();
   List<String> correctAnswer = List<String>();
   bool isLoading;
+  bool isPlayerWin;
   int counter = 0;
   int points = 0;
   int sec = 30;
@@ -79,17 +82,25 @@ class _QuizPageState extends State<QuizPage> {
       if (points == 4) {
         print("Draw");
       } else if (points > 4) {
+        setState(() {
+          isPlayerWin = true;
+        });
         print("You Win");
       } else if (points < 4) {
+        setState(() {
+          isPlayerWin = false;
+        });
         print("You Loose");
       }
 
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (_) => Result(
+                isWin: isPlayerWin,
                 trophies: 7,
                 bloc: widget.bloc,
                 blocToken: widget.blocToken,
                 tokens: 12,
+                prefs: widget.prefs,
               )));
 
       timer.cancel();
@@ -217,133 +228,191 @@ class _QuizPageState extends State<QuizPage> {
   }
 }
 
-class Result extends StatelessWidget {
+class Result extends StatefulWidget {
   final String mess;
   final int trophies, tokens;
   final BlocTrophy bloc;
   final BlocToken blocToken;
+  final SharedPreferences prefs;
+  final bool isWin;
 
-  Result({this.mess, this.trophies, this.tokens, this.bloc, this.blocToken});
+  Result(
+      {this.mess,
+      this.trophies,
+      this.tokens,
+      this.bloc,
+      this.blocToken,
+      this.prefs,
+      this.isWin});
 
-  void onContinue(BuildContext context) async {
-    if (trophies.isNegative) {
-      bloc.trophyEventSink.add(Decrement(trophy: trophies));
-      print("Substracted $trophies");
+  @override
+  _ResultState createState() => _ResultState();
+}
+
+class _ResultState extends State<Result> {
+  int trophies, tokens, matchplayed, matchwins, matchlooses;
+  String username;
+
+  @override
+  void initState() {
+    getData();
+    super.initState();
+  }
+
+  void getData() {
+    tokens = widget.prefs.getInt('tokens');
+    trophies = widget.prefs.getInt('trophy');
+    matchplayed = widget.prefs.getInt('matchplayed');
+    matchlooses = widget.prefs.getInt('matchlosses');
+    matchwins = widget.prefs.getInt('matchwins');
+    username = widget.prefs.getString('username');
+
+    setState(() {});
+  }
+
+  void onContinue() async {
+    if (widget.trophies.isNegative) {
+      widget.bloc.trophyEventSink.add(Decrement(trophy: widget.trophies));
+      print("Substracted ${widget.trophies}");
     } else {
-      bloc.trophyEventSink.add(Increment(trophy: trophies));
-      print("Added $trophies");
+      widget.bloc.trophyEventSink.add(Increment(trophy: widget.trophies));
+      print("Added ${widget.trophies}");
     }
 
-    if (tokens.isNegative) {
-      blocToken.tokenEventSink.add(DecrementToken(tokens));
+    if (widget.tokens.isNegative) {
+      widget.blocToken.tokenEventSink.add(DecrementToken(widget.tokens));
     } else {
-      blocToken.tokenEventSink.add(IncrementToken(tokens));
+      widget.blocToken.tokenEventSink.add(IncrementToken(widget.tokens));
     }
+
+    print("match Win = ${widget.isWin}");
 
     Map<String, dynamic> map = {
-      "matchplayed": 20,
-      "matchwins": 10,
-      "matchlosses": 10,
-      "tokens": 50,
-      "trophy": 62
+      "matchplayed": matchplayed + 1,
+      "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
+      "matchlosses": widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
+      "tokens": widget.tokens + tokens,
+      "trophy": widget.trophies + trophies
     };
 
-    sendTokensAndTrohiestoServer('Colt', map);
+    sendTokensAndTrohiestoServer(username, map).then((statusCode) {
+      if (statusCode == 200 || statusCode == 201) {
+        updateData();
+      }
+    });
 
     Navigator.pop(context);
+  }
+
+  void updateData() async {
+    await widget.prefs.setInt('matchplayed', matchplayed + 1);
+    await widget.prefs.setInt(
+        'matchwins', widget.isWin == true ? matchwins + 1 : matchwins + 0);
+    await widget.prefs.setInt('matchlosses',
+        widget.isWin == false ? matchlooses + 1 : matchlooses + 0);
+    await widget.prefs.setInt('tokens', widget.tokens + tokens);
+    await widget.prefs.setInt('trophy', widget.trophies + trophies);
   }
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      backgroundColor: Colors.amber,
-      body: Column(
-        children: [
-          SizedBox(
-            height: size.height / 25,
-          ),
-          Container(
-            height: size.height / 10,
-            width: size.width,
-            child: Row(
-              children: [
-                IconButton(
-                  icon: Icon(
-                    Icons.arrow_back_ios_outlined,
+    return WillPopScope(
+      // ignore: missing_return
+      onWillPop: () {
+        onContinue();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.amber,
+        body: Column(
+          children: [
+            SizedBox(
+              height: size.height / 25,
+            ),
+            Container(
+              height: size.height / 10,
+              width: size.width,
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_ios_outlined,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  SizedBox(
+                    width: size.width / 8,
+                  ),
+                  Text(
+                    "You Win this quiz",
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(
+              height: size.height / 30,
+            ),
+            Text(
+              "You Got",
+              style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white),
+            ),
+            SizedBox(
+              height: size.height / 20,
+            ),
+            Container(
+              height: size.height / 2.5,
+              width: size.width / 1.1,
+              decoration: BoxDecoration(
+                  color: Colors.blue[300],
+                  borderRadius: BorderRadius.circular(20)),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  showRewards(size, 20, 'assets/rupee.png', "Tokens"),
+                  Container(
+                    width: size.width / 150,
+                    height: size.height / 3,
                     color: Colors.white,
                   ),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                SizedBox(
-                  width: size.width / 8,
-                ),
-                Text(
-                  "You Win this quiz",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
+                  showRewards(size, 7, 'assets/trophy.png', "Trophy"),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: size.height / 5,
+            ),
+            Container(
+              height: size.height / 10,
+              width: size.width / 1.2,
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: RaisedButton(
+                      color: Colors.white,
+                      textColor: Colors.blue,
+                      child: Text("Continue"),
+                      shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.blue, width: 2.0),
+                          borderRadius: BorderRadius.circular(12)),
+                      onPressed: () => onContinue(),
+                    ),
                   ),
-                )
-              ],
-            ),
-          ),
-          SizedBox(
-            height: size.height / 30,
-          ),
-          Text(
-            "You Got",
-            style: TextStyle(
-                fontSize: 28, fontWeight: FontWeight.w500, color: Colors.white),
-          ),
-          SizedBox(
-            height: size.height / 20,
-          ),
-          Container(
-            height: size.height / 2.5,
-            width: size.width / 1.1,
-            decoration: BoxDecoration(
-                color: Colors.blue[300],
-                borderRadius: BorderRadius.circular(20)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                showRewards(size, 20, 'assets/rupee.png', "Tokens"),
-                Container(
-                  width: size.width / 150,
-                  height: size.height / 3,
-                  color: Colors.white,
-                ),
-                showRewards(size, 7, 'assets/trophy.png', "Trophy"),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: size.height / 5,
-          ),
-          Container(
-            height: size.height / 10,
-            width: size.width / 1.2,
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: RaisedButton(
-                    color: Colors.white,
-                    textColor: Colors.blue,
-                    child: Text("Continue"),
-                    shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.blue, width: 2.0),
-                        borderRadius: BorderRadius.circular(12)),
-                    onPressed: () => onContinue(context),
-                  ),
-                ),
-              ],
-            ),
-          )
-        ],
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

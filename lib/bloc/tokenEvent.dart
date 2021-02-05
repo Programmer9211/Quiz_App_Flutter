@@ -13,7 +13,7 @@ class DecrementToken extends TokenEvents {
 }
 
 class BlocToken {
-  int _currentToken = 10;
+  int _currentToken;
 
   final _tokenStateController = StreamController<int>.broadcast();
 
@@ -37,6 +37,10 @@ class BlocToken {
     }
 
     _intoken.add(_currentToken);
+  }
+
+  void initialize(int tokens) {
+    _currentToken = tokens;
   }
 
   void dispose() {

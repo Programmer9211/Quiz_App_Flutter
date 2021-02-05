@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_app/Dialoges/Dialoges.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
-
-import 'Dialoges.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Game extends StatefulWidget {
   final List newList;
   final BlocTrophy _bloc;
   final BlocToken blocToken;
-  Game(this.newList, this._bloc, this.blocToken);
+  final SharedPreferences prefs;
+  Game(this.newList, this._bloc, this.blocToken, this.prefs);
   @override
   _GameState createState() => _GameState();
 }
@@ -51,12 +52,19 @@ class _GameState extends State<Game> {
         width: size.width / 1.08,
         child: Row(
           children: [
+            SizedBox(
+              width: size.width / 100,
+            ),
             Container(
-              height: size.height / 10,
+              height: size.height / 9.5,
               width: size.width / 5.5,
-              decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(20)),
-              child: FlutterLogo(),
+              decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(
+                        'https://media.istockphoto.com/photos/varanasi-ganges-river-ghat-with-ancient-city-architecture-as-viewed-picture-id1126057186?s=612x612'),
+                    fit: BoxFit.cover,
+                  ),
+                  borderRadius: BorderRadius.circular(15)),
             ),
             Container(
               height: size.height / 10,
@@ -209,7 +217,8 @@ class _GameState extends State<Game> {
                               widget.newList[index]['name'],
                               widget.newList[index]['link'],
                               widget._bloc,
-                              widget.blocToken));
+                              widget.blocToken,
+                              widget.prefs));
                     },
                   )
                 ],
@@ -245,11 +254,4 @@ class _GameState extends State<Game> {
       ],
     );
   }
-}
-
-class Info {
-  final String url, name, imageUrl;
-  final int token;
-
-  Info({this.url, this.name, this.token, this.imageUrl});
 }

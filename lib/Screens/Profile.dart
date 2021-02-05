@@ -1,22 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Profile extends StatefulWidget {
   final BlocToken bloc;
   final BlocTrophy blocTrophy;
-  Profile({this.bloc, this.blocTrophy});
+  final SharedPreferences prefs;
+  Profile({this.bloc, this.blocTrophy, this.prefs});
 
   @override
   _ProfileState createState() => _ProfileState();
 }
 
 class _ProfileState extends State<Profile> {
+  String name;
+  int matchplayed, matchwins, matchlosse;
+
   @override
   void initState() {
     super.initState();
     widget.bloc.tokenEventSink.add(IncrementToken(0));
     widget.blocTrophy.trophyEventSink.add(Increment(trophy: 0));
+    name = widget.prefs.getString('name');
+    matchplayed = widget.prefs.getInt('matchplayed');
+    matchwins = widget.prefs.getInt('matchwins');
+    matchlosse = widget.prefs.getInt('matchlosses');
   }
 
   Widget build(BuildContext context) {
@@ -27,7 +37,16 @@ class _ProfileState extends State<Profile> {
       child: Column(
         children: [
           SizedBox(
-            height: size.height / 12,
+            height: size.height / 20,
+          ),
+          Container(
+            height: size.height / 15,
+            width: size.width / 1.2,
+            alignment: Alignment.topRight,
+            child: IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () => logout(context),
+            ),
           ),
           Container(
             height: size.height / 4,
@@ -49,7 +68,7 @@ class _ProfileState extends State<Profile> {
             width: size.width,
             alignment: Alignment.center,
             child: Text(
-              "Player Name",
+              name,
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
             ),
           ),
@@ -122,7 +141,7 @@ class _ProfileState extends State<Profile> {
           Expanded(
             child: Container(
               child: Text(
-                "Total Match\n      10",
+                "Total Match\n      $matchplayed",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               ),
             ),
@@ -130,7 +149,7 @@ class _ProfileState extends State<Profile> {
           Expanded(
             child: Container(
               child: Text(
-                "Match Wins\n        5",
+                "Match Wins\n        $matchwins",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               ),
             ),
@@ -138,7 +157,7 @@ class _ProfileState extends State<Profile> {
           Expanded(
             child: Container(
               child: Text(
-                "Match Loose\n        5",
+                "Match Loose\n        $matchlosse",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
               ),
             ),
