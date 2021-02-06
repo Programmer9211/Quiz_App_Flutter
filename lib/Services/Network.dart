@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:quiz_app/Screens/Authenticate/Authenticate.dart';
+import 'package:quiz_app/Authenticate/Authenticate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<List> getEventsFromServer() async {

@@ -7,9 +7,9 @@ import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'Analysis.dart';
-import 'Game.dart';
-import 'Profile.dart';
+import 'Sub Screens/Analysis.dart';
+import 'Sub Screens/Game.dart';
+import 'Sub Screens/Profile.dart';
 
 class HomePage extends StatefulWidget {
   @override

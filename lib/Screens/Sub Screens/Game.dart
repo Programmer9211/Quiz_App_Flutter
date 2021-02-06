@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/Dialoges/Dialoges.dart';
+import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,7 +30,39 @@ class _GameState extends State<Game> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        SizedBox(height: size.height / 15),
+        SizedBox(height: size.height / 25),
+        Container(
+          height: size.height / 20,
+          width: size.width,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                "Quiz Page",
+                style: TextStyle(
+                    fontSize: 28,
+                    // fontWeight: FontWeight.w400,
+                    color: Colors.purple),
+              ),
+              SizedBox(
+                width: size.width / 5.5,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: IconButton(
+                  icon: Icon(
+                    Icons.logout,
+                    color: Colors.purple,
+                  ),
+                  onPressed: () => logout(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: size.height / 30,
+        ),
         Container(
           width: size.width,
           alignment: Alignment.center,
@@ -134,7 +167,7 @@ class _GameState extends State<Game> {
 
   Widget builder(Size size) {
     return Container(
-      height: size.height / 1.5,
+      height: size.height / 1.58,
       width: size.width,
       child: ListView.builder(
         itemCount: widget.newList.length,

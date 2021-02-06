@@ -24,7 +24,7 @@ class _QuizPageState extends State<QuizPage> {
   bool isPlayerWin;
   int counter = 0;
   int points = 0;
-  int sec = 30;
+  int sec = 10;
   Timer timer;
 
   @override
@@ -58,14 +58,17 @@ class _QuizPageState extends State<QuizPage> {
         sec = sec - 1;
       });
       if (sec == 0) {
-        timer.cancel();
-        setState(() {
-          counter++;
-          answerList[counter].shuffle();
-          sec = 30;
-        });
+        if (counter == 9) {
+          result();
+        } else {
+          setState(() {
+            counter++;
+            answerList[counter].shuffle();
+            sec = 20;
+          });
 
-        runTimer();
+          runTimer();
+        }
       }
     });
   }
@@ -78,7 +81,12 @@ class _QuizPageState extends State<QuizPage> {
       print("Wrong answer");
     }
 
+    result();
+  }
+
+  void result() {
     if (counter == 9) {
+      timer.cancel();
       if (points == 4) {
         print("Draw");
       } else if (points > 4) {
@@ -109,7 +117,7 @@ class _QuizPageState extends State<QuizPage> {
       setState(() {
         counter++;
         answerList[counter].shuffle();
-        sec = 30;
+        sec = 20;
       });
 
       runTimer();

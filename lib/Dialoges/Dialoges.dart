@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:quiz_app/Screens/QuizPage.dart';
+import 'package:quiz_app/Screens/Sub%20Screens/QuizPage.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
@@ -37,9 +37,13 @@ class PlayWarning extends StatelessWidget {
         ),
         FlatButton(
           textColor: Colors.white,
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-              builder: (_) => QuizPage(
-                  bloc: bloc, blocToken: blocToken, url: url, prefs: prefs))),
+          onPressed: () {
+            Navigator.pop(context);
+
+            Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => QuizPage(
+                    bloc: bloc, blocToken: blocToken, url: url, prefs: prefs)));
+          },
           child: Text("Play"),
         ),
       ],

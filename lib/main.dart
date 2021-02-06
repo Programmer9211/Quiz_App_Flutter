@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'Screens/Authenticate/Authenticate.dart';
+import 'Authenticate/Authenticate.dart';
 
 void main() => runApp(MyApp());
 

@@ -1,69 +1,81 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/Screens/Authenticate/Loading.dart';
 import 'package:quiz_app/Screens/HomePage.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Register extends StatefulWidget {
+import 'Loading.dart';
+
+class LoginPage extends StatefulWidget {
   @override
-  _RegisterState createState() => _RegisterState();
+  _LoginPageState createState() => _LoginPageState();
 }
 
-class _RegisterState extends State<Register> {
-  TextEditingController _name = TextEditingController();
+class _LoginPageState extends State<LoginPage> {
   TextEditingController _username = TextEditingController();
   TextEditingController _password = TextEditingController();
 
-  bool isLoading = false;
+  bool isloading = false;
+  SharedPreferences _prefs;
 
-  void onPressed() {
-    if (_name.text.isNotEmpty &&
-        _password.text.isNotEmpty &&
-        _username.text.isNotEmpty) {
+  @override
+  void initState() {
+    super.initState();
+    _initializePrefs();
+  }
+
+  void _initializePrefs() async {
+    _prefs = await SharedPreferences.getInstance();
+  }
+
+  Future _onLogin() async {
+    if (_username.text.isNotEmpty && _password.text.isNotEmpty) {
       setState(() {
-        isLoading = true;
+        isloading = true;
       });
 
-      Map<String, dynamic> _map = {
-        "name": _name.text,
-        "username": _username.text,
-        "password": _password.text,
-        "matchplayed": 0,
-        "matchwins": 0,
-        "matchlosses": 0,
-        "tokens": 0,
-        "trophy": 0
+      Map<String, String> map = {
+        'username': _username.text,
+        'password': _password.text
       };
 
-      registerNewUser(_map).then((_) {
-        setState(() {
-          isLoading = false;
-          saveData().then((_) => print("Values Saved in Variables"));
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => HomePage()));
-        });
+      userLogin(map).then((message) {
+        if (message == "Username doesn't Exist") {
+          setState(() {
+            isloading = false;
+          });
+        } else if (message == "Login Sucessful") {
+        } else {
+          getUserDataFromServer(_username.text).then((map) {
+            _setData(map).then((_) {
+              print("Saved Sucessfully");
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => HomePage()),
+                  (Route<dynamic> route) => false);
+            });
+          });
+        }
       });
+    } else {
+      print("Please Enter username and password");
     }
   }
 
-  Future saveData() async {
-    SharedPreferences _prefs = await SharedPreferences.getInstance();
-
-    await _prefs.setString('name', _name.text);
-    await _prefs.setString('username', _username.text);
-    await _prefs.setString('password', _password.text);
-    await _prefs.setInt('matchplayed', 0);
-    await _prefs.setInt('matchwins', 0);
-    await _prefs.setInt('matchlosses', 0);
-    await _prefs.setInt('tokens', 0);
-    await _prefs.setInt('trophy', 0);
+  Future _setData(Map<String, dynamic> map) async {
+    await _prefs.setString('name', map['name']);
+    await _prefs.setString('username', map['username']);
+    await _prefs.setString('password', map['password']);
+    await _prefs.setInt('matchplayed', map['matchplayed']);
+    await _prefs.setInt('matchwins', map['matchwins']);
+    await _prefs.setInt('matchlosses', map['matchlosses']);
+    await _prefs.setInt('tokens', map['tokens']);
+    await _prefs.setInt('trophy', map['trophy']);
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return isLoading == true
+    return isloading == true
         ? Loading()
         : Scaffold(
             body: SingleChildScrollView(
@@ -88,15 +100,15 @@ class _RegisterState extends State<Register> {
                   Container(
                     width: size.width / 1.1,
                     child: Text(
-                      "Create Account,",
+                      "Welcome,",
                       style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                          TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                     ),
                   ),
                   Container(
                     width: size.width / 1.1,
                     child: Text(
-                      "Sign Up To Get Started!",
+                      "Sign In to Continue!",
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
@@ -105,14 +117,6 @@ class _RegisterState extends State<Register> {
                   ),
                   SizedBox(
                     height: size.height / 15,
-                  ),
-                  Container(
-                    width: size.width,
-                    alignment: Alignment.center,
-                    child: textField(size, 'Name', Icons.account_circle, _name),
-                  ),
-                  SizedBox(
-                    height: size.height / 40,
                   ),
                   Container(
                     width: size.width,
@@ -135,7 +139,7 @@ class _RegisterState extends State<Register> {
                     elevation: 10,
                     borderRadius: BorderRadius.circular(8),
                     child: GestureDetector(
-                      onTap: onPressed,
+                      onTap: _onLogin,
                       child: Container(
                         height: size.height / 12.5,
                         width: size.width / 1.2,
@@ -155,18 +159,18 @@ class _RegisterState extends State<Register> {
                     ),
                   ),
                   SizedBox(
-                    height: size.height / 8,
+                    height: size.height / 4.5,
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        "I'm Already a member,",
+                        "I'm a New User,",
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        "SignIn",
+                        "SignUp",
                         style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -177,15 +181,6 @@ class _RegisterState extends State<Register> {
                 ],
               ),
             ),
-            // floatingActionButton: FloatingActionButton(
-            //   onPressed: () async {
-            //     SharedPreferences pr = await SharedPreferences.getInstance();
-            //     await pr.clear().then((l) {
-            //       print(l);
-            //       print("Done");
-            //     });
-            //   },
-            // ),
           );
   }
 
@@ -209,7 +204,6 @@ class _RegisterState extends State<Register> {
 
   @override
   void dispose() {
-    _name.dispose();
     _username.dispose();
     _password.dispose();
     super.dispose();
