@@ -24,12 +24,19 @@ class _HomePageState extends State<HomePage> {
   SharedPreferences prefs;
   BlocTrophy _bloc;
   BlocToken _blocToken;
+  List getLeaderboard;
 
   @override
   void initState() {
     initializePrefs();
     super.initState();
     isLoading = true;
+    getLeaderboardFromServer().then((list) {
+      setState(() {
+        getLeaderboard = list;
+        print(list);
+      });
+    });
     getEventsFromServer().then((list) {
       setState(() {
         eventsList = list;
@@ -70,7 +77,9 @@ class _HomePageState extends State<HomePage> {
                 ? Center(child: CircularProgressIndicator())
                 : Game(eventsList, _bloc, _blocToken, prefs);
           } else if (currentIndex == 0) {
-            return Analysis();
+            return Analysis(
+              list: getLeaderboard,
+            );
           } else {
             return Profile(
               bloc: _blocToken,

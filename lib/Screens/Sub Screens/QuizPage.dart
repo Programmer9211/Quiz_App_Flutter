@@ -11,7 +11,14 @@ class QuizPage extends StatefulWidget {
   final BlocTrophy bloc;
   final BlocToken blocToken;
   final SharedPreferences prefs;
-  QuizPage({this.bloc, this.url, this.name, this.blocToken, this.prefs});
+  final int chargeToken;
+  QuizPage(
+      {this.bloc,
+      this.url,
+      this.name,
+      this.blocToken,
+      this.prefs,
+      this.chargeToken});
   @override
   _QuizPageState createState() => _QuizPageState();
 }
@@ -85,29 +92,69 @@ class _QuizPageState extends State<QuizPage> {
   }
 
   void result() {
+    int trophy, tokens;
+
+    void _set() {
+      setState(() {});
+    }
+
     if (counter == 9) {
       timer.cancel();
-      if (points == 4) {
-        print("Draw");
-      } else if (points > 4) {
-        setState(() {
-          isPlayerWin = true;
-        });
-        print("You Win");
-      } else if (points < 4) {
-        setState(() {
-          isPlayerWin = false;
-        });
-        print("You Loose");
+
+      switch (points) {
+        case 1:
+          trophy = -7;
+          tokens = 0;
+          _set();
+          break;
+        case 2:
+          trophy = -5;
+          tokens = 0;
+          _set();
+          break;
+        case 3:
+          trophy = -3;
+          tokens = 0;
+          _set();
+          break;
+        case 4:
+          trophy = -1;
+          tokens = 0;
+          _set();
+          break;
+        case 5:
+          trophy = 2;
+          tokens = 2;
+          _set();
+          break;
+        case 6:
+          trophy = 4;
+          tokens = 4;
+          _set();
+          break;
+        case 7:
+          trophy = 6;
+          tokens = 6;
+          _set();
+          break;
+        case 9:
+          trophy = 8;
+          tokens = 9;
+          _set();
+          break;
+        default:
+          trophy = 10;
+          tokens = 12;
+          _set();
       }
 
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (_) => Result(
                 isWin: isPlayerWin,
-                trophies: 7,
+                trophies: trophy,
                 bloc: widget.bloc,
                 blocToken: widget.blocToken,
-                tokens: 12,
+                tokens: tokens - widget.chargeToken,
                 prefs: widget.prefs,
               )));
 
@@ -305,7 +352,15 @@ class _ResultState extends State<Result> {
 
     sendTokensAndTrohiestoServer(username, map).then((statusCode) {
       if (statusCode == 200 || statusCode == 201) {
+        Map<String, dynamic> _leaderboard = {
+          "username": widget.prefs.getString('username'),
+          "tokens": widget.tokens + tokens,
+          "trophy": widget.trophies + trophies
+        };
+
         updateData();
+        updateDataToLeaderboard(
+            widget.prefs.getString('username'), _leaderboard);
       }
     });
 

@@ -5,6 +5,8 @@ import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Reward/RewardScreen.dart';
+
 class Game extends StatefulWidget {
   final List newList;
   final BlocTrophy _bloc;
@@ -27,52 +29,56 @@ class _GameState extends State<Game> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(height: size.height / 25),
-        Container(
-          height: size.height / 20,
-          width: size.width,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              Text(
-                "Quiz Page",
-                style: TextStyle(
-                    fontSize: 28,
-                    // fontWeight: FontWeight.w400,
-                    color: Colors.purple),
-              ),
-              SizedBox(
-                width: size.width / 5.5,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                child: IconButton(
-                  icon: Icon(
-                    Icons.logout,
-                    color: Colors.purple,
-                  ),
-                  onPressed: () => logout(context),
+    return Container(
+      color: Colors.blueAccent,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(height: size.height / 25),
+          Container(
+            height: size.height / 20,
+            width: size.width,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  "Quiz Page",
+                  style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white),
                 ),
-              ),
-            ],
+                SizedBox(
+                  width: size.width / 5.5,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  child: IconButton(
+                    icon: Icon(
+                      Icons.logout,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => logout(context),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        SizedBox(
-          height: size.height / 30,
-        ),
-        Container(
-          width: size.width,
-          alignment: Alignment.center,
-          child: header(size),
-        ),
-        SizedBox(
-          height: size.height / 20,
-        ),
-        builder(size)
-      ],
+          SizedBox(
+            height: size.height / 30,
+          ),
+          Container(
+            width: size.width,
+            alignment: Alignment.center,
+            color: Colors.blueAccent,
+            child: header(size),
+          ),
+          SizedBox(
+            height: size.height / 20,
+          ),
+          builder(size)
+        ],
+      ),
     );
   }
 
@@ -152,7 +158,8 @@ class _GameState extends State<Game> {
               ),
             ),
             IconButton(
-              onPressed: () {},
+              onPressed: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => RewardScreen())),
               icon: Icon(
                 Icons.arrow_forward,
                 color: Colors.purple,

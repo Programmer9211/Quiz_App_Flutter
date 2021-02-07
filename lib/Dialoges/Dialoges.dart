@@ -8,13 +8,13 @@ import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PlayWarning extends StatelessWidget {
-  final int token;
+  final int chargeToken;
   final BlocTrophy bloc;
   final BlocToken blocToken;
   final String name, url;
   final SharedPreferences prefs;
-  PlayWarning(
-      this.token, this.name, this.url, this.bloc, this.blocToken, this.prefs);
+  PlayWarning(this.chargeToken, this.name, this.url, this.bloc, this.blocToken,
+      this.prefs);
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -26,7 +26,7 @@ class PlayWarning extends StatelessWidget {
             color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500),
       ),
       content: Text(
-          "You will be Charge $token tokens for playing this mode and if you answered more then 50% of questions you will win and if not you will loss tokens",
+          "You will be Charge $chargeToken tokens for playing this mode and if you answered more then 50% of questions you will win and if not you will loss tokens",
           style: TextStyle(
               color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500)),
       actions: [
@@ -42,7 +42,11 @@ class PlayWarning extends StatelessWidget {
 
             Navigator.of(context).push(MaterialPageRoute(
                 builder: (_) => QuizPage(
-                    bloc: bloc, blocToken: blocToken, url: url, prefs: prefs)));
+                    bloc: bloc,
+                    blocToken: blocToken,
+                    url: url,
+                    prefs: prefs,
+                    chargeToken: chargeToken)));
           },
           child: Text("Play"),
         ),
@@ -69,10 +73,17 @@ class FreeTokens extends StatelessWidget {
         "trophy": prefs.getInt('trophy')
       };
 
+      Map<String, dynamic> _leaderboardMap = {
+        "username": username,
+        "tokens": prefs.getInt('tokens'),
+        "trophy": 0
+      };
+
       bloc.tokenEventSink.add(IncrementToken(25));
       Navigator.pop(context);
 
       sendTokensAndTrohiestoServer(username, map);
+      updateDataToLeaderboard(username, _leaderboardMap);
     });
   }
 

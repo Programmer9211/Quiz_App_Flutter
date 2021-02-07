@@ -25,7 +25,7 @@ class _RegisterState extends State<Register> {
         isLoading = true;
       });
 
-      Map<String, dynamic> _map = {
+      final Map<String, dynamic> _map = {
         "name": _name.text,
         "username": _username.text,
         "password": _password.text,
@@ -36,13 +36,20 @@ class _RegisterState extends State<Register> {
         "trophy": 0
       };
 
+      final Map<String, dynamic> _leaderboardData = {
+        "username": _username.text,
+        "tokens": 0,
+        "trophy": 0
+      };
+
       registerNewUser(_map).then((_) {
         setState(() {
           isLoading = false;
-          saveData().then((_) => print("Values Saved in Variables"));
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => HomePage()));
         });
+        saveData().then((_) => print("Values Saved in Variables"));
+        postDataToLeaderboard(_leaderboardData);
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (_) => HomePage()));
       });
     }
   }

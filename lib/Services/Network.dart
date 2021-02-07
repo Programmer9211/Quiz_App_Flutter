@@ -117,7 +117,8 @@ Future<Map<String, dynamic>> getUserDataFromServer(String username) async {
 }
 
 Future<List> getLeaderboardFromServer() async {
-  final String _url = '';
+  final String _url =
+      'https://pure-forest-54952.herokuapp.com/event/getleaderboard';
 
   List _list = List();
 
@@ -141,4 +142,42 @@ Future logout(BuildContext context) async {
         MaterialPageRoute(builder: (_) => Authenticate()),
         (Route<dynamic> route) => false);
   });
+}
+
+Future postDataToLeaderboard(Map<String, dynamic> map) async {
+  final String _url = "https://pure-forest-54952.herokuapp.com/event/postdata";
+
+  var response = await http.post(
+    _url,
+    body: json.encode(map),
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+    },
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("Data Send Scessfully");
+  } else {
+    print("Unexpected Error : ${response.statusCode}");
+  }
+}
+
+Future updateDataToLeaderboard(
+    String username, Map<String, dynamic> map) async {
+  final String _url =
+      'https://pure-forest-54952.herokuapp.com/event/updatedata/$username';
+
+  var response = await http.patch(
+    _url,
+    body: json.encode(map),
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+    },
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("Data Update Sucessfully");
+  } else {
+    print("Error occured : ${response.statusCode}");
+  }
 }
