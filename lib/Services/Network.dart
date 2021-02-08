@@ -181,3 +181,22 @@ Future updateDataToLeaderboard(
     print("Error occured : ${response.statusCode}");
   }
 }
+
+Future<List> getRewardList() async {
+  final String _url =
+      'https://pure-forest-54952.herokuapp.com/reward/getrewards';
+
+  var _response = await http.get(_url);
+
+  if (_response.statusCode == 200 || _response.statusCode == 201) {
+    List _list;
+
+    _list = json.decode(_response.body);
+    print(_list);
+
+    return _list;
+  } else {
+    print("An Error Occured StatusCode : ${_response.statusCode}");
+    return List();
+  }
+}

@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 
+// ignore: must_be_immutable
 class RewardScreen extends StatelessWidget {
+  final List list;
+  RewardScreen(this.list);
+
   bool isComplete = false;
 
-  void onComplete() {
+  void _onComplete() {
     print("complete");
   }
 
-  void onGO(BuildContext context) {
+  void _onGO(BuildContext context) {
     Navigator.pop(context);
   }
 
@@ -76,7 +80,7 @@ class RewardScreen extends StatelessWidget {
                           width: size.width / 4,
                         ),
                         Text(
-                          "1/5 Completed",
+                          "1/${list.length} Completed",
                           style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.w500,
@@ -104,17 +108,17 @@ class RewardScreen extends StatelessWidget {
 
   Widget builder(Size size, BuildContext context) {
     return ListView.builder(
-      itemCount: 10,
+      itemCount: list.length,
       itemBuilder: (context, index) {
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0),
-          child: items(size, context),
+          child: items(size, context, index),
         );
       },
     );
   }
 
-  Widget items(Size size, BuildContext context) {
+  Widget items(Size size, BuildContext context, int index) {
     return Container(
       height: size.height / 15,
       width: size.width / 1.1,
@@ -123,9 +127,13 @@ class RewardScreen extends StatelessWidget {
           SizedBox(
             width: size.width / 30,
           ),
-          Text(
-            "10",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+          Container(
+            width: size.width / 20,
+            alignment: Alignment.center,
+            child: Text(
+              (list[index]['tokens']).toString(),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            ),
           ),
           SizedBox(
             width: size.width / 100,
@@ -142,7 +150,7 @@ class RewardScreen extends StatelessWidget {
           Container(
             width: size.width / 2.15,
             child: Text(
-              "Task Name",
+              list[index]['title'],
               style: TextStyle(fontWeight: FontWeight.w500, fontSize: 20),
             ),
           ),
@@ -154,7 +162,7 @@ class RewardScreen extends StatelessWidget {
             color: isComplete ? Colors.green[800] : Colors.blueAccent,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            onPressed: isComplete ? () => onComplete() : () => onGO(context),
+            onPressed: isComplete ? () => _onComplete() : () => _onGO(context),
           )
         ],
       ),

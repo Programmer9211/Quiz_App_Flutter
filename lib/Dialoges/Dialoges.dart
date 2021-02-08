@@ -1,13 +1,14 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:quiz_app/Screens/Sub%20Screens/Game.dart';
 import 'package:quiz_app/Screens/Sub%20Screens/QuizPage.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class PlayWarning extends StatelessWidget {
+class PlayWarning extends StatefulWidget {
   final int chargeToken;
   final BlocTrophy bloc;
   final BlocToken blocToken;
@@ -15,42 +16,74 @@ class PlayWarning extends StatelessWidget {
   final SharedPreferences prefs;
   PlayWarning(this.chargeToken, this.name, this.url, this.bloc, this.blocToken,
       this.prefs);
+
+  @override
+  _PlayWarningState createState() => _PlayWarningState();
+}
+
+class _PlayWarningState extends State<PlayWarning>
+    with SingleTickerProviderStateMixin {
+  Animation<double> animation;
+  AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
+
+    final CurvedAnimation curvedAnimation =
+        CurvedAnimation(curve: Curves.fastOutSlowIn, parent: controller);
+
+    animation = Tween<double>(begin: 0.0, end: 1.0).animate(curvedAnimation);
+
+    controller.addListener(() {
+      setState(() {});
+    });
+
+    controller.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      backgroundColor: Colors.amber,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Text(
-        name,
-        style: TextStyle(
-            color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500),
-      ),
-      content: Text(
-          "You will be Charge $chargeToken tokens for playing this mode and if you answered more then 50% of questions you will win and if not you will loss tokens",
+    return ScaleTransition(
+      scale: animation,
+      child: AlertDialog(
+        backgroundColor: Colors.amber,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          widget.name,
           style: TextStyle(
-              color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500)),
-      actions: [
-        FlatButton(
-          textColor: Colors.white,
-          onPressed: () => Navigator.pop(context),
-          child: Text("Cancel"),
+              color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500),
         ),
-        FlatButton(
-          textColor: Colors.white,
-          onPressed: () {
-            Navigator.pop(context);
+        content: Text(
+            "You will be Charge ${widget.chargeToken} tokens for playing this mode and if you answered more then 50% of questions you will win and if not you will loss tokens",
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500)),
+        actions: [
+          FlatButton(
+            textColor: Colors.white,
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel"),
+          ),
+          FlatButton(
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.pop(context);
 
-            Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => QuizPage(
-                    bloc: bloc,
-                    blocToken: blocToken,
-                    url: url,
-                    prefs: prefs,
-                    chargeToken: chargeToken)));
-          },
-          child: Text("Play"),
-        ),
-      ],
+              Navigator.of(context).push(RouteToPage(QuizPage(
+                  bloc: widget.bloc,
+                  blocToken: widget.blocToken,
+                  url: widget.url,
+                  prefs: widget.prefs,
+                  chargeToken: widget.chargeToken)));
+            },
+            child: Text("Play"),
+          ),
+        ],
+      ),
     );
   }
 }

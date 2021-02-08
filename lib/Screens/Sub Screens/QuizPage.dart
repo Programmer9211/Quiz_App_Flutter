@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:quiz_app/Authenticate/Loading.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
@@ -31,7 +32,7 @@ class _QuizPageState extends State<QuizPage> {
   bool isPlayerWin;
   int counter = 0;
   int points = 0;
-  int sec = 10;
+  int sec = 20;
   Timer timer;
 
   @override
@@ -74,7 +75,7 @@ class _QuizPageState extends State<QuizPage> {
             sec = 20;
           });
 
-          runTimer();
+          //runTimer();
         }
       }
     });
@@ -176,9 +177,7 @@ class _QuizPageState extends State<QuizPage> {
     final size = MediaQuery.of(context).size;
 
     return isLoading == true
-        ? Center(
-            child: CircularProgressIndicator(),
-          )
+        ? Loading()
         : Scaffold(
             body: Column(
               children: [
@@ -327,17 +326,20 @@ class _ResultState extends State<Result> {
 
   void onContinue() async {
     if (widget.trophies.isNegative) {
-      widget.bloc.trophyEventSink.add(Decrement(trophy: widget.trophies));
+      widget.bloc.trophyEventSink
+          .add(Decrement(trophy: widget.trophies + trophies));
       print("Substracted ${widget.trophies}");
     } else {
-      widget.bloc.trophyEventSink.add(Increment(trophy: widget.trophies));
+      widget.bloc.trophyEventSink
+          .add(Increment(trophy: widget.trophies + trophies));
       print("Added ${widget.trophies}");
     }
 
     if (widget.tokens.isNegative) {
       widget.blocToken.tokenEventSink.add(DecrementToken(widget.tokens));
     } else {
-      widget.blocToken.tokenEventSink.add(IncrementToken(widget.tokens));
+      widget.blocToken.tokenEventSink
+          .add(IncrementToken(widget.tokens + tokens));
     }
 
     print("match Win = ${widget.isWin}");

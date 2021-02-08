@@ -8,19 +8,37 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Reward/RewardScreen.dart';
 
 class Game extends StatefulWidget {
-  final List newList;
+  final List newList, rewardList;
   final BlocTrophy _bloc;
   final BlocToken blocToken;
   final SharedPreferences prefs;
-  Game(this.newList, this._bloc, this.blocToken, this.prefs);
+  Game(this.newList, this._bloc, this.blocToken, this.prefs, this.rewardList);
   @override
   _GameState createState() => _GameState();
 }
 
-class _GameState extends State<Game> {
+class _GameState extends State<Game> with SingleTickerProviderStateMixin {
+  Animation animation;
+  AnimationController controller;
+
   @override
   void initState() {
     super.initState();
+
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+
+    final CurvedAnimation curvedAnimation =
+        CurvedAnimation(curve: Curves.fastOutSlowIn, parent: controller);
+
+    animation = Tween<double>(begin: 0.0, end: 1.0).animate(curvedAnimation);
+
+    controller.addListener(() {
+      setState(() {});
+    });
+
+    controller.forward();
+
     widget.blocToken.tokenEventSink.add(IncrementToken(0));
     widget.newList.shuffle();
   }
@@ -29,55 +47,58 @@ class _GameState extends State<Game> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Container(
-      color: Colors.blueAccent,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: size.height / 25),
-          Container(
-            height: size.height / 20,
-            width: size.width,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  "Quiz Page",
-                  style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white),
-                ),
-                SizedBox(
-                  width: size.width / 5.5,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.logout,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => logout(context),
+    return FadeTransition(
+      opacity: animation,
+      child: Container(
+        color: Colors.blueAccent,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: size.height / 25),
+            Container(
+              height: size.height / 20,
+              width: size.width,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Text(
+                    "Quiz Page",
+                    style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white),
                   ),
-                ),
-              ],
+                  SizedBox(
+                    width: size.width / 5.5,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.logout,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => logout(context),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          SizedBox(
-            height: size.height / 30,
-          ),
-          Container(
-            width: size.width,
-            alignment: Alignment.center,
-            color: Colors.blueAccent,
-            child: header(size),
-          ),
-          SizedBox(
-            height: size.height / 20,
-          ),
-          builder(size)
-        ],
+            SizedBox(
+              height: size.height / 30,
+            ),
+            Container(
+              width: size.width,
+              alignment: Alignment.center,
+              color: Colors.blueAccent,
+              child: header(size),
+            ),
+            SizedBox(
+              height: size.height / 20,
+            ),
+            builder(size)
+          ],
+        ),
       ),
     );
   }
@@ -159,7 +180,7 @@ class _GameState extends State<Game> {
             ),
             IconButton(
               onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => RewardScreen())),
+                  .push(RouteToPage(RewardScreen(widget.rewardList))),
               icon: Icon(
                 Icons.arrow_forward,
                 color: Colors.purple,
@@ -294,4 +315,25 @@ class _GameState extends State<Game> {
       ],
     );
   }
+}
+
+class RouteToPage extends PageRouteBuilder {
+  final Widget page;
+
+  RouteToPage(
+    this.page,
+  ) : super(
+            pageBuilder: (BuildContext context, Animation<double> animation,
+                    Animation<double> secondaryAnimation) =>
+                page,
+            transitionsBuilder: (BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                    Widget child) =>
+                ScaleTransition(
+                  scale: Tween<double>(begin: 0.0, end: 1.0).animate(
+                      CurvedAnimation(
+                          parent: animation, curve: Curves.fastOutSlowIn)),
+                  child: child,
+                ));
 }

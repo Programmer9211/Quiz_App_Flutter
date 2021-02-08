@@ -1,5 +1,13 @@
 class RewardData {
-  List getRewardList() {}
+  // List<RewardListData> getRewardList() {
+  //   List<RewardListData> data = List<RewardListData>();
+
+  //   for (int i = 0; i <= 10; i++) {}
+
+  //   return data;
+  // }
+
+  
 }
 
 class RewardListData {
