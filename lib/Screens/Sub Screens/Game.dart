@@ -17,16 +17,26 @@ class Game extends StatefulWidget {
   _GameState createState() => _GameState();
 }
 
-class _GameState extends State<Game> with SingleTickerProviderStateMixin {
+class _GameState extends State<Game> with TickerProviderStateMixin {
   Animation animation;
-  AnimationController controller;
+  AnimationController controller, _controller;
+  ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
 
+    _scrollController = ScrollController()
+      ..addListener(() {
+        _controller.reset();
+        _controller.forward();
+      });
+
     controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
 
     final CurvedAnimation curvedAnimation =
         CurvedAnimation(curve: Curves.fastOutSlowIn, parent: controller);
@@ -38,6 +48,7 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
     });
 
     controller.forward();
+    _controller.forward();
 
     widget.blocToken.tokenEventSink.add(IncrementToken(0));
     widget.newList.shuffle();
@@ -194,15 +205,17 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
   }
 
   Widget builder(Size size) {
+    final _animation = Tween(begin: 0.85, end: 1.0).animate(_controller);
     return Container(
-      height: size.height / 1.58,
+      height: size.height / 1.4,
       width: size.width,
       child: ListView.builder(
+        controller: _scrollController,
         itemCount: widget.newList.length,
         itemBuilder: (context, index) {
           return Padding(
             padding: const EdgeInsets.all(12.0),
-            child: item(size, index),
+            child: ScaleTransition(scale: _animation, child: item(size, index)),
           );
         },
       ),
@@ -266,7 +279,7 @@ class _GameState extends State<Game> with SingleTickerProviderStateMixin {
                       )),
                   SizedBox(),
                   RaisedButton(
-                    color: Colors.white,
+                    color: Colors.orangeAccent,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)),
                     child: Text("Play Now"),

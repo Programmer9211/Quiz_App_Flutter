@@ -7,8 +7,8 @@ class RewardScreen extends StatelessWidget {
 
   bool isComplete = false;
 
-  void _onComplete() {
-    print("complete");
+  void _onComplete(int token) {
+    //sendTokensAndTrohiestoServer();
   }
 
   void _onGO(BuildContext context) {
@@ -162,7 +162,8 @@ class RewardScreen extends StatelessWidget {
             color: isComplete ? Colors.green[800] : Colors.blueAccent,
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            onPressed: isComplete ? () => _onComplete() : () => _onGO(context),
+            onPressed:
+                isComplete ? () => _onComplete(10) : () => _onGO(context),
           )
         ],
       ),

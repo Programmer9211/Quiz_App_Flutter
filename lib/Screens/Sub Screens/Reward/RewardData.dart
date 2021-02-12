@@ -1,13 +1,19 @@
 class RewardData {
-  // List<RewardListData> getRewardList() {
-  //   List<RewardListData> data = List<RewardListData>();
+  List<RewardListData> data = [
+    RewardListData(taskname: "Daily Login", tokens: 5),
+    RewardListData(taskname: "Play 5 Matchs", tokens: 8),
+    RewardListData(taskname: "Win 2 Matches", tokens: 10),
+  ];
 
-  //   for (int i = 0; i <= 10; i++) {}
+  List<bool> isComplete() {
+    List<bool> _list = List<bool>();
 
-  //   return data;
-  // }
+    for (int i = 0; i == 3; i++) {
+      _list.add(false);
+    }
 
-  
+    return _list;
+  }
 }
 
 class RewardListData {

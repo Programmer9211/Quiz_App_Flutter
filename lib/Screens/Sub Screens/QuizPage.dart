@@ -24,7 +24,8 @@ class QuizPage extends StatefulWidget {
   _QuizPageState createState() => _QuizPageState();
 }
 
-class _QuizPageState extends State<QuizPage> {
+class _QuizPageState extends State<QuizPage>
+    with SingleTickerProviderStateMixin {
   List<String> questionList = List<String>();
   List<List<String>> answerList = List<List<String>>();
   List<String> correctAnswer = List<String>();
@@ -35,8 +36,15 @@ class _QuizPageState extends State<QuizPage> {
   int sec = 20;
   Timer timer;
 
+  AnimationController _controller;
+
   @override
   void initState() {
+    _controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+
+    _controller.forward();
+
     super.initState();
     isLoading = true;
     getQuestionsListFromServer(widget.url).then((list) {
@@ -74,6 +82,8 @@ class _QuizPageState extends State<QuizPage> {
             answerList[counter].shuffle();
             sec = 20;
           });
+          _controller.reset();
+          _controller.forward();
 
           //runTimer();
         }
@@ -90,6 +100,8 @@ class _QuizPageState extends State<QuizPage> {
     }
 
     result();
+    _controller.reset();
+    _controller.forward();
   }
 
   void result() {
@@ -175,6 +187,8 @@ class _QuizPageState extends State<QuizPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final animation =
+        Tween(begin: Offset(1.0, 0.0), end: Offset.zero).animate(_controller);
 
     return isLoading == true
         ? Loading()
@@ -213,55 +227,15 @@ class _QuizPageState extends State<QuizPage> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
                   ),
                 ),
-                Container(
-                  width: size.width / 1.1,
-                  child: Text(
-                    "Ques ${counter + 1}:  ${questionList[counter]}",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                SizedBox(
-                  height: size.height / 20,
-                ),
-                Container(
-                  height: size.height / 10,
-                  width: size.width / 1.1,
-                  child: GestureDetector(
-                    onTap: () => checkAnswer(answerList[counter][0]),
-                    child: Text("a  ${answerList[counter][0]}.",
-                        style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.w500)),
-                  ),
-                ),
-                Container(
-                  height: size.height / 10,
-                  width: size.width / 1.1,
-                  child: GestureDetector(
-                    onTap: () => checkAnswer(answerList[counter][1]),
-                    child: Text("b  ${answerList[counter][1]}.",
-                        style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.w500)),
-                  ),
-                ),
-                Container(
-                  height: size.height / 10,
-                  width: size.width / 1.1,
-                  child: GestureDetector(
-                    onTap: () => checkAnswer(answerList[counter][2]),
-                    child: Text("c  ${answerList[counter][2]}.",
-                        style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.w500)),
-                  ),
-                ),
-                Container(
-                  height: size.height / 10,
-                  width: size.width / 1.1,
-                  child: GestureDetector(
-                    onTap: () => checkAnswer(answerList[counter][3]),
-                    child: Text("d  ${answerList[counter][3]}.",
-                        style: TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.w500)),
-                  ),
+                AnimatedBuilder(
+                  animation: animation,
+                  child: requiredchild(size),
+                  builder: (context, child) {
+                    return SlideTransition(
+                      position: animation,
+                      child: child,
+                    );
+                  },
                 ),
               ],
             ),
@@ -273,6 +247,59 @@ class _QuizPageState extends State<QuizPage> {
             //   },
             // ),
           );
+  }
+
+  Widget requiredchild(Size size) {
+    return Column(
+      children: [
+        Container(
+          width: size.width / 1.1,
+          child: Text(
+            "Ques ${counter + 1}:  ${questionList[counter]}",
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+          ),
+        ),
+        SizedBox(
+          height: size.height / 20,
+        ),
+        Container(
+          height: size.height / 10,
+          width: size.width / 1.1,
+          child: GestureDetector(
+            onTap: () => checkAnswer(answerList[counter][0]),
+            child: Text("a  ${answerList[counter][0]}.",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+          ),
+        ),
+        Container(
+          height: size.height / 10,
+          width: size.width / 1.1,
+          child: GestureDetector(
+            onTap: () => checkAnswer(answerList[counter][1]),
+            child: Text("b  ${answerList[counter][1]}.",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+          ),
+        ),
+        Container(
+          height: size.height / 10,
+          width: size.width / 1.1,
+          child: GestureDetector(
+            onTap: () => checkAnswer(answerList[counter][2]),
+            child: Text("c  ${answerList[counter][2]}.",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+          ),
+        ),
+        Container(
+          height: size.height / 10,
+          width: size.width / 1.1,
+          child: GestureDetector(
+            onTap: () => checkAnswer(answerList[counter][3]),
+            child: Text("d  ${answerList[counter][3]}.",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+          ),
+        ),
+      ],
+    );
   }
 
   @override
@@ -310,6 +337,7 @@ class _ResultState extends State<Result> {
   @override
   void initState() {
     getData();
+    checkForRewards();
     super.initState();
   }
 
@@ -378,6 +406,8 @@ class _ResultState extends State<Result> {
     await widget.prefs.setInt('tokens', widget.tokens + tokens);
     await widget.prefs.setInt('trophy', widget.trophies + trophies);
   }
+
+  void checkForRewards() {}
 
   @override
   Widget build(BuildContext context) {
