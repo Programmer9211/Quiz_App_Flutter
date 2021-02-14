@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/Authenticate/Loading.dart';
+import 'package:quiz_app/Services/Const.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
@@ -118,46 +119,55 @@ class _QuizPageState extends State<QuizPage>
         case 1:
           trophy = -7;
           tokens = 0;
+          isPlayerWin = false;
           _set();
           break;
         case 2:
           trophy = -5;
           tokens = 0;
+          isPlayerWin = false;
           _set();
           break;
         case 3:
           trophy = -3;
           tokens = 0;
+          isPlayerWin = false;
           _set();
           break;
         case 4:
           trophy = -1;
           tokens = 0;
+          isPlayerWin = false;
           _set();
           break;
         case 5:
           trophy = 2;
           tokens = 2;
+          isPlayerWin = true;
           _set();
           break;
         case 6:
           trophy = 4;
           tokens = 4;
+          isPlayerWin = true;
           _set();
           break;
         case 7:
           trophy = 6;
           tokens = 6;
+          isPlayerWin = true;
           _set();
           break;
         case 9:
           trophy = 8;
           tokens = 9;
+          isPlayerWin = true;
           _set();
           break;
         default:
           trophy = 10;
           tokens = 12;
+          isPlayerWin = true;
           _set();
       }
 
@@ -193,51 +203,62 @@ class _QuizPageState extends State<QuizPage>
     return isLoading == true
         ? Loading()
         : Scaffold(
-            body: Column(
-              children: [
-                SizedBox(
-                  height: size.height / 25,
-                ),
-                Container(
-                  height: size.height / 10,
-                  width: size.width,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.arrow_back_ios_outlined),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      SizedBox(
-                        width: size.width / 5,
-                      ),
-                      Text(
-                        "Quiz Page",
-                        style: TextStyle(
-                            fontSize: 28, fontWeight: FontWeight.w500),
-                      ),
-                    ],
+            body: Container(
+              height: size.height,
+              width: size.width,
+              color: getColors[0],
+              child: Column(
+                children: [
+                  SizedBox(
+                    height: size.height / 25,
                   ),
-                ),
-                Container(
-                  height: size.height / 7,
-                  width: size.width,
-                  alignment: Alignment.center,
-                  child: Text(
-                    "Time Left : $sec sec",
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                  Container(
+                    height: size.height / 10,
+                    width: size.width,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(Icons.arrow_back_ios_outlined,
+                              color: Colors.white),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                        SizedBox(
+                          width: size.width / 5,
+                        ),
+                        Text(
+                          "Quiz Page",
+                          style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                AnimatedBuilder(
-                  animation: animation,
-                  child: requiredchild(size),
-                  builder: (context, child) {
-                    return SlideTransition(
-                      position: animation,
-                      child: child,
-                    );
-                  },
-                ),
-              ],
+                  Container(
+                    height: size.height / 7,
+                    width: size.width,
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Time Left : $sec sec",
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white),
+                    ),
+                  ),
+                  AnimatedBuilder(
+                    animation: animation,
+                    child: requiredchild(size),
+                    builder: (context, child) {
+                      return SlideTransition(
+                        position: animation,
+                        child: child,
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
             // floatingActionButton: FloatingActionButton(
             //   onPressed: () {
@@ -256,47 +277,80 @@ class _QuizPageState extends State<QuizPage>
           width: size.width / 1.1,
           child: Text(
             "Ques ${counter + 1}:  ${questionList[counter]}",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+            style: TextStyle(
+                fontSize: 22, fontWeight: FontWeight.w500, color: Colors.white),
           ),
         ),
         SizedBox(
-          height: size.height / 20,
+          height: size.height / 40,
+        ),
+        Divider(
+          color: Colors.white,
         ),
         Container(
-          height: size.height / 10,
+          height: size.height / 15,
           width: size.width / 1.1,
+          alignment: Alignment.centerLeft,
           child: GestureDetector(
             onTap: () => checkAnswer(answerList[counter][0]),
             child: Text("a  ${answerList[counter][0]}.",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white)),
           ),
         ),
+        Divider(
+          color: Colors.white,
+        ),
         Container(
-          height: size.height / 10,
+          height: size.height / 15,
           width: size.width / 1.1,
+          alignment: Alignment.centerLeft,
           child: GestureDetector(
             onTap: () => checkAnswer(answerList[counter][1]),
             child: Text("b  ${answerList[counter][1]}.",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white)),
           ),
         ),
+        Divider(
+          color: Colors.white,
+        ),
         Container(
-          height: size.height / 10,
+          height: size.height / 15,
           width: size.width / 1.1,
+          alignment: Alignment.centerLeft,
           child: GestureDetector(
             onTap: () => checkAnswer(answerList[counter][2]),
             child: Text("c  ${answerList[counter][2]}.",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white)),
           ),
         ),
+        Divider(
+          color: Colors.white,
+        ),
         Container(
-          height: size.height / 10,
+          height: size.height / 15,
           width: size.width / 1.1,
+          alignment: Alignment.centerLeft,
           child: GestureDetector(
             onTap: () => checkAnswer(answerList[counter][3]),
             child: Text("d  ${answerList[counter][3]}.",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500)),
+                style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white)),
           ),
+        ),
+        Divider(
+          color: Colors.white,
+          thickness: 1,
         ),
       ],
     );
@@ -305,6 +359,7 @@ class _QuizPageState extends State<QuizPage>
   @override
   void dispose() {
     timer.cancel();
+    _controller.dispose();
     super.dispose();
   }
 }
@@ -337,7 +392,6 @@ class _ResultState extends State<Result> {
   @override
   void initState() {
     getData();
-    checkForRewards();
     super.initState();
   }
 
@@ -354,9 +408,14 @@ class _ResultState extends State<Result> {
 
   void onContinue() async {
     if (widget.trophies.isNegative) {
-      widget.bloc.trophyEventSink
-          .add(Decrement(trophy: widget.trophies + trophies));
-      print("Substracted ${widget.trophies}");
+      if (trophies <= 10) {
+        widget.bloc.trophyEventSink.add(Decrement(trophy: 0 + trophies));
+        print("No Trophy Substracted Substracted");
+      } else {
+        widget.bloc.trophyEventSink
+            .add(Decrement(trophy: widget.trophies + trophies));
+        print("Substracted ${widget.trophies}");
+      }
     } else {
       widget.bloc.trophyEventSink
           .add(Increment(trophy: widget.trophies + trophies));
@@ -364,7 +423,8 @@ class _ResultState extends State<Result> {
     }
 
     if (widget.tokens.isNegative) {
-      widget.blocToken.tokenEventSink.add(DecrementToken(widget.tokens));
+      widget.blocToken.tokenEventSink
+          .add(DecrementToken(widget.tokens + tokens));
     } else {
       widget.blocToken.tokenEventSink
           .add(IncrementToken(widget.tokens + tokens));
@@ -372,42 +432,66 @@ class _ResultState extends State<Result> {
 
     print("match Win = ${widget.isWin}");
 
-    Map<String, dynamic> map = {
-      "matchplayed": matchplayed + 1,
-      "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
-      "matchlosses": widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
-      "tokens": widget.tokens + tokens,
-      "trophy": widget.trophies + trophies
-    };
+    if (trophies <= 10) {
+      Map<String, dynamic> map = {
+        "matchplayed": matchplayed + 1,
+        "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
+        "matchlosses":
+            widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
+        "tokens": widget.tokens + tokens,
+        "trophy": 0 + trophies
+      };
 
-    sendTokensAndTrohiestoServer(username, map).then((statusCode) {
-      if (statusCode == 200 || statusCode == 201) {
-        Map<String, dynamic> _leaderboard = {
-          "username": widget.prefs.getString('username'),
-          "tokens": widget.tokens + tokens,
-          "trophy": widget.trophies + trophies
-        };
+      sendTokensAndTrohiestoServer(username, map).then((statusCode) {
+        if (statusCode == 200 || statusCode == 201) {
+          Map<String, dynamic> _leaderboard = {
+            "username": widget.prefs.getString('username'),
+            "tokens": widget.tokens + tokens,
+            "trophy": 0 + trophies
+          };
 
-        updateData();
-        updateDataToLeaderboard(
-            widget.prefs.getString('username'), _leaderboard);
-      }
-    });
+          updateData(0);
+          updateDataToLeaderboard(
+              widget.prefs.getString('username'), _leaderboard);
+        }
+      });
+    } else {
+      Map<String, dynamic> map = {
+        "matchplayed": matchplayed + 1,
+        "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
+        "matchlosses":
+            widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
+        "tokens": widget.tokens + tokens,
+        "trophy": widget.trophies + trophies
+      };
+
+      sendTokensAndTrohiestoServer(username, map).then((statusCode) {
+        if (statusCode == 200 || statusCode == 201) {
+          Map<String, dynamic> _leaderboard = {
+            "username": widget.prefs.getString('username'),
+            "tokens": widget.tokens + tokens,
+            "trophy": widget.trophies + trophies
+          };
+
+          updateData(widget.trophies);
+          updateDataToLeaderboard(
+              widget.prefs.getString('username'), _leaderboard);
+        }
+      });
+    }
 
     Navigator.pop(context);
   }
 
-  void updateData() async {
+  void updateData(int trophy) async {
     await widget.prefs.setInt('matchplayed', matchplayed + 1);
     await widget.prefs.setInt(
         'matchwins', widget.isWin == true ? matchwins + 1 : matchwins + 0);
     await widget.prefs.setInt('matchlosses',
         widget.isWin == false ? matchlooses + 1 : matchlooses + 0);
     await widget.prefs.setInt('tokens', widget.tokens + tokens);
-    await widget.prefs.setInt('trophy', widget.trophies + trophies);
+    await widget.prefs.setInt('trophy', trophy + trophies);
   }
-
-  void checkForRewards() {}
 
   @override
   Widget build(BuildContext context) {
@@ -419,7 +503,7 @@ class _ResultState extends State<Result> {
         onContinue();
       },
       child: Scaffold(
-        backgroundColor: Colors.amber,
+        backgroundColor: getColors[0],
         body: Column(
           children: [
             SizedBox(
@@ -435,7 +519,7 @@ class _ResultState extends State<Result> {
                       Icons.arrow_back_ios_outlined,
                       color: Colors.white,
                     ),
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: () => onContinue(),
                   ),
                   SizedBox(
                     width: size.width / 8,
@@ -468,8 +552,7 @@ class _ResultState extends State<Result> {
               height: size.height / 2.5,
               width: size.width / 1.1,
               decoration: BoxDecoration(
-                  color: Colors.blue[300],
-                  borderRadius: BorderRadius.circular(20)),
+                  color: getColors[3], borderRadius: BorderRadius.circular(20)),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/Dialoges/Dialoges.dart';
-import 'package:quiz_app/Services/Network.dart';
+import 'package:quiz_app/Dialoges/LogoutDialog.dart';
+import 'package:quiz_app/Services/Const.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,7 +62,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
     return FadeTransition(
       opacity: animation,
       child: Container(
-        color: Colors.blueAccent,
+        color: getColors[0],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -89,7 +90,8 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                         Icons.logout,
                         color: Colors.white,
                       ),
-                      onPressed: () => logout(context),
+                      onPressed: () => showDialog(
+                          context: context, builder: (_) => LogoutDialog()),
                     ),
                   ),
                 ],
@@ -101,7 +103,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
             Container(
               width: size.width,
               alignment: Alignment.center,
-              color: Colors.blueAccent,
+              color: getColors[0],
               child: header(size),
             ),
             SizedBox(
@@ -190,8 +192,12 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
               ),
             ),
             IconButton(
-              onPressed: () => Navigator.of(context)
-                  .push(RouteToPage(RewardScreen(widget.rewardList))),
+              onPressed: () => showDialog(
+                  context: context,
+                  builder: (_) => Message(
+                        content: "This Feature Will Avalible Soon",
+                        title: "Under Devlopment",
+                      )),
               icon: Icon(
                 Icons.arrow_forward,
                 color: Colors.purple,
@@ -279,20 +285,33 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                       )),
                   SizedBox(),
                   RaisedButton(
-                    color: Colors.orangeAccent,
+                    color: getColors[1],
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)),
                     child: Text("Play Now"),
+                    textColor: Colors.white,
                     onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (_) => PlayWarning(
-                              widget.newList[index]['token'],
-                              widget.newList[index]['name'],
-                              widget.newList[index]['link'],
-                              widget._bloc,
-                              widget.blocToken,
-                              widget.prefs));
+                      if (widget.prefs.getInt('tokens') <
+                          widget.newList[index]['token']) {
+                        showDialog(
+                            context: context,
+                            builder: (_) => Message(
+                                  title: "Tokens",
+                                  content:
+                                      "You Dot Have Enough Token To Play This Mode",
+                                ));
+                      } else {
+                        showDialog(
+                            context: context,
+                            builder: (_) => PlayWarning(
+                                  widget.newList[index]['token'],
+                                  widget.newList[index]['name'],
+                                  widget.newList[index]['link'],
+                                  widget._bloc,
+                                  widget.blocToken,
+                                  widget.prefs,
+                                ));
+                      }
                     },
                   )
                 ],

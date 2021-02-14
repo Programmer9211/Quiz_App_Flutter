@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quiz_app/Authenticate/Loading.dart';
+import 'package:quiz_app/Services/Const.dart';
 
 class Analysis extends StatefulWidget {
   final List list;
@@ -50,7 +51,13 @@ class _AnalysisState extends State<Analysis>
                   Container(
                     height: size.height / 2.5,
                     width: size.width,
-                    color: Colors.purple[400],
+                    decoration: BoxDecoration(
+                      color: getColors[0],
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(20),
+                        bottomRight: Radius.circular(20),
+                      ),
+                    ),
                     child: Column(
                       children: [
                         SizedBox(

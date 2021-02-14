@@ -101,8 +101,10 @@ class _LoginPageState extends State<LoginPage> {
                     width: size.width / 1.1,
                     child: Text(
                       "Welcome,",
-                      style:
-                          TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Container(
@@ -112,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey),
+                          color: Colors.grey[700]),
                     ),
                   ),
                   SizedBox(
@@ -137,6 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Material(
                     elevation: 10,
+                    color: Colors.blue,
                     borderRadius: BorderRadius.circular(8),
                     child: GestureDetector(
                       onTap: _onLogin,
@@ -145,8 +148,8 @@ class _LoginPageState extends State<LoginPage> {
                         width: size.width / 1.2,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.blue),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: Text(
                           'Login',
                           style: TextStyle(
@@ -167,7 +170,9 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         "I'm a New User,",
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       Text(
                         "SignUp",

@@ -53,7 +53,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       });
       _blocToken = BlocToken()..initialize(prefs.getInt('tokens'));
       _bloc = BlocTrophy()..initialize(prefs.getInt('trophy'));
-      if (prefs.getInt('tokens') == 0) {
+      if (prefs.getInt('tokens') <= 4) {
         givenToken();
       }
     });
@@ -126,24 +126,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         //   ],
         // ),
 
-        floatingActionButton: StreamBuilder(
-            stream: _pageEvent.boolState,
-            initialData: true,
-            builder: (context, snapshot) {
-              if (snapshot.data == true) {
-                return FloatingActionButton(
-                  backgroundColor: Colors.amber,
-                  child: Icon(Icons.add),
-                  onPressed: () {
-                    _pageEvent.getBool.add(false);
-                  },
-                );
-              } else {
-                return Buttons(
-                  pageEvent: _pageEvent,
-                );
-              }
-            }));
+        floatingActionButton: eventsList == null
+            ? Container()
+            : StreamBuilder(
+                stream: _pageEvent.boolState,
+                initialData: true,
+                builder: (context, snapshot) {
+                  if (snapshot.data == true) {
+                    return FloatingActionButton(
+                      backgroundColor: Colors.amber,
+                      child: Icon(Icons.add),
+                      onPressed: () {
+                        _pageEvent.getBool.add(false);
+                      },
+                    );
+                  } else {
+                    return Buttons(
+                      pageEvent: _pageEvent,
+                    );
+                  }
+                }));
   }
 }
 
@@ -164,7 +166,7 @@ class _ButtonsState extends State<Buttons> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     controller =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
 
     final CurvedAnimation curvedAnimation =
         CurvedAnimation(curve: Curves.fastOutSlowIn, parent: controller);
@@ -232,7 +234,11 @@ class _ButtonsState extends State<Buttons> with SingleTickerProviderStateMixin {
                   color: Colors.white,
                 ),
                 onPressed: () {
-                  widget.pageEvent.getBool.add(true);
+                  controller.reverse();
+
+                  Timer(Duration(milliseconds: 500), () {
+                    widget.pageEvent.getBool.add(true);
+                  });
                 },
               ),
             ],

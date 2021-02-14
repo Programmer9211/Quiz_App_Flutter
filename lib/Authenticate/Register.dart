@@ -97,8 +97,10 @@ class _RegisterState extends State<Register> {
                     width: size.width / 1.1,
                     child: Text(
                       "Create Account,",
-                      style:
-                          TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   Container(
@@ -106,9 +108,9 @@ class _RegisterState extends State<Register> {
                     child: Text(
                       "Sign Up To Get Started!",
                       style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                   SizedBox(
@@ -141,6 +143,7 @@ class _RegisterState extends State<Register> {
                   ),
                   Material(
                     elevation: 10,
+                    color: Colors.blue,
                     borderRadius: BorderRadius.circular(8),
                     child: GestureDetector(
                       onTap: onPressed,
@@ -149,14 +152,14 @@ class _RegisterState extends State<Register> {
                         width: size.width / 1.2,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            color: Colors.blue),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: Text(
                           'Login',
                           style: TextStyle(
                             fontSize: 20,
-                            color: Colors.white,
                             fontWeight: FontWeight.w500,
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -171,7 +174,9 @@ class _RegisterState extends State<Register> {
                       Text(
                         "I'm Already a member,",
                         style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       Text(
                         "SignIn",

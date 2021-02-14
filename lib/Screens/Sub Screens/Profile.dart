@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/Services/Network.dart';
+import 'package:quiz_app/Dialoges/LogoutDialog.dart';
+import 'package:quiz_app/Services/Const.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -53,7 +54,7 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
     return FadeTransition(
       opacity: animation,
       child: Container(
-        color: Colors.amber[100],
+        color: getColors[0],
         child: Column(
           children: [
             SizedBox(
@@ -64,8 +65,12 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               width: size.width / 1.2,
               alignment: Alignment.topRight,
               child: IconButton(
-                icon: Icon(Icons.logout),
-                onPressed: () => logout(context),
+                icon: Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                ),
+                onPressed: () => showDialog(
+                    context: context, builder: (_) => LogoutDialog()),
               ),
             ),
             Container(
@@ -89,7 +94,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
               alignment: Alignment.center,
               child: Text(
                 name,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
               ),
             ),
             Container(
@@ -107,7 +115,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         return Text(
                           "${snapshot.data}",
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white),
                         );
                       }),
                   SizedBox(
@@ -130,7 +140,9 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
                         return Text(
                           snapshot.data.toString(),
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500),
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white),
                         );
                       }),
                   SizedBox(
@@ -161,17 +173,21 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
         children: [
           Expanded(
             child: Container(
-              child: Text(
-                "Total Match\n      $matchplayed",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-              ),
+              child: Text("Total Match\n      $matchplayed",
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white)),
             ),
           ),
           Expanded(
             child: Container(
               child: Text(
                 "Match Wins\n        $matchwins",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
               ),
             ),
           ),
@@ -179,7 +195,10 @@ class _ProfileState extends State<Profile> with SingleTickerProviderStateMixin {
             child: Container(
               child: Text(
                 "Match Loose\n        $matchlosse",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white),
               ),
             ),
           ),
