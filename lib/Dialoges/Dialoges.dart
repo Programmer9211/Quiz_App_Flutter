@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/Screens/Sub%20Screens/Game.dart';
-import 'package:quiz_app/Screens/Sub%20Screens/QuizPage.dart';
+import 'package:quiz_app/Screens/Sub%20Screens/Quiz%20page/QuizPage.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';

@@ -85,8 +85,6 @@ class _QuizPageState extends State<QuizPage>
           });
           _controller.reset();
           _controller.forward();
-
-          //runTimer();
         }
       }
     });
@@ -174,6 +172,7 @@ class _QuizPageState extends State<QuizPage>
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (_) => Result(
                 isWin: isPlayerWin,
+                correctAns: points,
                 trophies: trophy,
                 bloc: widget.bloc,
                 blocToken: widget.blocToken,
@@ -366,7 +365,7 @@ class _QuizPageState extends State<QuizPage>
 
 class Result extends StatefulWidget {
   final String mess;
-  final int trophies, tokens;
+  final int trophies, tokens, correctAns;
   final BlocTrophy bloc;
   final BlocToken blocToken;
   final SharedPreferences prefs;
@@ -379,7 +378,8 @@ class Result extends StatefulWidget {
       this.bloc,
       this.blocToken,
       this.prefs,
-      this.isWin});
+      this.isWin,
+      this.correctAns});
 
   @override
   _ResultState createState() => _ResultState();
@@ -409,52 +409,82 @@ class _ResultState extends State<Result> {
   void onContinue() async {
     if (widget.trophies.isNegative) {
       if (trophies <= 10) {
-        widget.bloc.trophyEventSink.add(Decrement(trophy: 0 + trophies));
+        widget.bloc.trophyEventSink.add(Decrement(trophy: trophies));
         print("No Trophy Substracted Substracted");
       } else {
-        widget.bloc.trophyEventSink
-            .add(Decrement(trophy: widget.trophies + trophies));
+        widget.bloc.trophyEventSink.add(Decrement(trophy: widget.trophies));
         print("Substracted ${widget.trophies}");
       }
     } else {
       widget.bloc.trophyEventSink
           .add(Increment(trophy: widget.trophies + trophies));
-      print("Added ${widget.trophies}");
+      print(
+          "Added ${widget.trophies} trophi $trophies Tokens ${widget.tokens}");
     }
 
+    print("Tokens ${widget.tokens}");
+
     if (widget.tokens.isNegative) {
-      widget.blocToken.tokenEventSink
-          .add(DecrementToken(widget.tokens + tokens));
+      if (tokens <= 10) {
+        widget.blocToken.tokenEventSink.add(DecrementToken(0));
+      } else {
+        widget.blocToken.tokenEventSink.add(DecrementToken(widget.tokens));
+      }
     } else {
-      widget.blocToken.tokenEventSink
-          .add(IncrementToken(widget.tokens + tokens));
+      widget.blocToken.tokenEventSink.add(IncrementToken(widget.tokens));
     }
 
     print("match Win = ${widget.isWin}");
 
-    if (trophies <= 10) {
-      Map<String, dynamic> map = {
-        "matchplayed": matchplayed + 1,
-        "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
-        "matchlosses":
-            widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
-        "tokens": widget.tokens + tokens,
-        "trophy": 0 + trophies
-      };
+    if (widget.trophies.isNegative) {
+      if (trophies <= 10) {
+        print(":) $trophies");
+        Map<String, dynamic> map = {
+          "matchplayed": matchplayed + 1,
+          "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
+          "matchlosses":
+              widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
+          "tokens": widget.tokens + tokens,
+          "trophy": widget.prefs.getInt('trophy')
+        };
 
-      sendTokensAndTrohiestoServer(username, map).then((statusCode) {
-        if (statusCode == 200 || statusCode == 201) {
-          Map<String, dynamic> _leaderboard = {
-            "username": widget.prefs.getString('username'),
-            "tokens": widget.tokens + tokens,
-            "trophy": 0 + trophies
-          };
+        sendTokensAndTrohiestoServer(username, map).then((statusCode) {
+          if (statusCode == 200 || statusCode == 201) {
+            Map<String, dynamic> _leaderboard = {
+              "username": widget.prefs.getString('username'),
+              "tokens": widget.tokens + tokens,
+              "trophy": widget.prefs.getInt('trophy')
+            };
 
-          updateData(0);
-          updateDataToLeaderboard(
-              widget.prefs.getString('username'), _leaderboard);
-        }
-      });
+            updateData(0);
+            updateDataToLeaderboard(
+                widget.prefs.getString('username'), _leaderboard);
+          }
+        });
+      } else {
+        Map<String, dynamic> map = {
+          "matchplayed": matchplayed + 1,
+          "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
+          "matchlosses":
+              widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
+          "tokens": widget.tokens + tokens,
+          "trophy": widget.trophies + trophies
+        };
+
+        sendTokensAndTrohiestoServer(username, map).then((statusCode) {
+          if (statusCode == 200 || statusCode == 201) {
+            Map<String, dynamic> _leaderboard = {
+              "username": widget.prefs.getString('username'),
+              "tokens": widget.tokens + tokens,
+              "trophy": widget.trophies + widget.prefs.getInt('trophy')
+            };
+
+            updateData(widget.trophies);
+            updateDataToLeaderboard(
+                widget.prefs.getString('username'), _leaderboard);
+          }
+        });
+      }
     } else {
       Map<String, dynamic> map = {
         "matchplayed": matchplayed + 1,
@@ -470,7 +500,7 @@ class _ResultState extends State<Result> {
           Map<String, dynamic> _leaderboard = {
             "username": widget.prefs.getString('username'),
             "tokens": widget.tokens + tokens,
-            "trophy": widget.trophies + trophies
+            "trophy": widget.trophies + widget.prefs.getInt('trophy')
           };
 
           updateData(widget.trophies);
@@ -490,7 +520,7 @@ class _ResultState extends State<Result> {
     await widget.prefs.setInt('matchlosses',
         widget.isWin == false ? matchlooses + 1 : matchlooses + 0);
     await widget.prefs.setInt('tokens', widget.tokens + tokens);
-    await widget.prefs.setInt('trophy', trophy + trophies);
+    await widget.prefs.setInt('trophy', trophy + widget.prefs.getInt('trophy'));
   }
 
   @override
@@ -525,7 +555,9 @@ class _ResultState extends State<Result> {
                     width: size.width / 8,
                   ),
                   Text(
-                    "You Win this quiz",
+                    widget.correctAns >= 6
+                        ? "You Win this quiz"
+                        : "You Loose this quiz",
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w500,
@@ -556,18 +588,29 @@ class _ResultState extends State<Result> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  showRewards(size, 20, 'assets/rupee.png', "Tokens"),
+                  showRewards(
+                      size, widget.tokens, 'assets/rupee.png', "Tokens"),
                   Container(
                     width: size.width / 150,
                     height: size.height / 3,
                     color: Colors.white,
                   ),
-                  showRewards(size, 7, 'assets/trophy.png', "Trophy"),
+                  showRewards(
+                      size, widget.trophies, 'assets/trophy.png', "Trophy"),
                 ],
               ),
             ),
-            SizedBox(
-              height: size.height / 5,
+            Container(
+              alignment: Alignment.centerLeft,
+              height: size.height / 4.5,
+              width: size.width / 1.2,
+              child: Text(
+                  "Correct Answers: ${widget.correctAns} \n \nWrong Answers: ${10 - widget.correctAns}",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w500,
+                  )),
             ),
             Container(
               height: size.height / 10,

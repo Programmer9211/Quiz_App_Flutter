@@ -6,8 +6,6 @@ import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'Reward/RewardScreen.dart';
-
 class Game extends StatefulWidget {
   final List newList, rewardList;
   final BlocTrophy _bloc;
@@ -253,10 +251,13 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
               height: size.height / 8,
               width: size.width / 1.05,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
+                  SizedBox(
+                    width: size.width / 30,
+                  ),
                   Container(
                       height: size.height / 8,
+                      width: size.width / 1.6,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -284,35 +285,38 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                         ],
                       )),
                   SizedBox(),
-                  RaisedButton(
-                    color: getColors[1],
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
-                    child: Text("Play Now"),
-                    textColor: Colors.white,
-                    onPressed: () {
-                      if (widget.prefs.getInt('tokens') <
-                          widget.newList[index]['token']) {
-                        showDialog(
-                            context: context,
-                            builder: (_) => Message(
-                                  title: "Tokens",
-                                  content:
-                                      "You Dot Have Enough Token To Play This Mode",
-                                ));
-                      } else {
-                        showDialog(
-                            context: context,
-                            builder: (_) => PlayWarning(
-                                  widget.newList[index]['token'],
-                                  widget.newList[index]['name'],
-                                  widget.newList[index]['link'],
-                                  widget._bloc,
-                                  widget.blocToken,
-                                  widget.prefs,
-                                ));
-                      }
-                    },
+                  Container(
+                    width: size.width / 4,
+                    child: RaisedButton(
+                      color: getColors[1],
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      child: Text("Play Now"),
+                      textColor: Colors.white,
+                      onPressed: () {
+                        if (widget.prefs.getInt('tokens') <
+                            widget.newList[index]['token']) {
+                          showDialog(
+                              context: context,
+                              builder: (_) => Message(
+                                    title: "Tokens",
+                                    content:
+                                        "You Dot Have Enough Token To Play This Mode",
+                                  ));
+                        } else {
+                          showDialog(
+                              context: context,
+                              builder: (_) => PlayWarning(
+                                    widget.newList[index]['token'],
+                                    widget.newList[index]['name'],
+                                    widget.newList[index]['link'],
+                                    widget._bloc,
+                                    widget.blocToken,
+                                    widget.prefs,
+                                  ));
+                        }
+                      },
+                    ),
                   )
                 ],
               ),
@@ -328,7 +332,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
     String show,
   ) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Text(
           show,
