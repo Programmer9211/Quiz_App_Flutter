@@ -25,26 +25,36 @@ class QuizPage extends StatefulWidget {
   _QuizPageState createState() => _QuizPageState();
 }
 
-class _QuizPageState extends State<QuizPage>
-    with SingleTickerProviderStateMixin {
+class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
   List<String> questionList = List<String>();
   List<List<String>> answerList = List<List<String>>();
   List<String> correctAnswer = List<String>();
+  List<Color> colors = List<Color>();
   bool isLoading;
   bool isPlayerWin;
   int counter = 0;
   int points = 0;
   int sec = 20;
   Timer timer;
+  int hintfee = 0;
+  Color bulbColor = Colors.white;
 
-  AnimationController _controller;
+  AnimationController _controller, _hintAnimation;
 
   @override
   void initState() {
+    for (int i = 0; i <= 3; i++) {
+      colors.add(Colors.white);
+    }
+
     _controller =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
 
+    _hintAnimation =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+
     _controller.forward();
+    _hintAnimation.forward();
 
     super.initState();
     isLoading = true;
@@ -82,6 +92,10 @@ class _QuizPageState extends State<QuizPage>
             counter++;
             answerList[counter].shuffle();
             sec = 20;
+            colors[0] = Colors.white;
+            colors[1] = Colors.white;
+            colors[2] = Colors.white;
+            colors[3] = Colors.white;
           });
           _controller.reset();
           _controller.forward();
@@ -91,6 +105,15 @@ class _QuizPageState extends State<QuizPage>
   }
 
   void checkAnswer(String answer) {
+    for (int i = 0; i <= 3; i++) {
+      setState(() {
+        colors[0] = Colors.white;
+        colors[1] = Colors.white;
+        colors[2] = Colors.white;
+        colors[3] = Colors.white;
+      });
+    }
+
     if (answer == correctAnswer[counter]) {
       print("Correct anwer");
       points++;
@@ -176,7 +199,8 @@ class _QuizPageState extends State<QuizPage>
                 trophies: trophy,
                 bloc: widget.bloc,
                 blocToken: widget.blocToken,
-                tokens: tokens - widget.chargeToken,
+                tokens: tokens,
+                totalToken: (tokens - widget.chargeToken) - hintfee,
                 prefs: widget.prefs,
               )));
 
@@ -193,11 +217,42 @@ class _QuizPageState extends State<QuizPage>
     }
   }
 
+  void onHint() {
+    _hintAnimation.reset();
+    bulbColor = Colors.yellow;
+    setState(() {});
+    _hintAnimation.forward();
+    Timer(Duration(milliseconds: 500), () {
+      setState(() {
+        bulbColor = Colors.white;
+      });
+    });
+
+    if (answerList[counter][0] == correctAnswer[counter]) {
+      colors[0] = Colors.green;
+      setState(() {});
+    } else if (answerList[counter][1] == correctAnswer[counter]) {
+      colors[1] = Colors.green;
+      setState(() {});
+    } else if (answerList[counter][2] == correctAnswer[counter]) {
+      colors[2] = Colors.green;
+      setState(() {});
+    } else if (answerList[counter][3] == correctAnswer[counter]) {
+      colors[3] = Colors.green;
+      setState(() {});
+    }
+    setState(() {
+      hintfee = hintfee + 3;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final animation =
         Tween(begin: Offset(1.0, 0.0), end: Offset.zero).animate(_controller);
+    final hintAnimation =
+        Tween<double>(begin: 2.0, end: 1.0).animate(_hintAnimation);
 
     return isLoading == true
         ? Loading()
@@ -231,6 +286,20 @@ class _QuizPageState extends State<QuizPage>
                               fontWeight: FontWeight.w500,
                               color: Colors.white),
                         ),
+                        SizedBox(width: size.width / 5),
+                        GestureDetector(
+                            onTap: () => onHint(),
+                            child: AnimatedBuilder(
+                              animation: hintAnimation,
+                              child: Icon(Icons.lightbulb,
+                                  color: bulbColor, size: 35),
+                              builder: (BuildContext context, Widget child) {
+                                return ScaleTransition(
+                                  scale: hintAnimation,
+                                  child: child,
+                                );
+                              },
+                            )),
                       ],
                     ),
                   ),
@@ -296,7 +365,7 @@ class _QuizPageState extends State<QuizPage>
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white)),
+                    color: colors[0])),
           ),
         ),
         Divider(
@@ -312,7 +381,7 @@ class _QuizPageState extends State<QuizPage>
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white)),
+                    color: colors[1])),
           ),
         ),
         Divider(
@@ -328,7 +397,7 @@ class _QuizPageState extends State<QuizPage>
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white)),
+                    color: colors[2])),
           ),
         ),
         Divider(
@@ -344,7 +413,7 @@ class _QuizPageState extends State<QuizPage>
                 style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w500,
-                    color: Colors.white)),
+                    color: colors[3])),
           ),
         ),
         Divider(
@@ -365,7 +434,7 @@ class _QuizPageState extends State<QuizPage>
 
 class Result extends StatefulWidget {
   final String mess;
-  final int trophies, tokens, correctAns;
+  final int trophies, tokens, correctAns, totalToken;
   final BlocTrophy bloc;
   final BlocToken blocToken;
   final SharedPreferences prefs;
@@ -379,7 +448,8 @@ class Result extends StatefulWidget {
       this.blocToken,
       this.prefs,
       this.isWin,
-      this.correctAns});
+      this.correctAns,
+      this.totalToken});
 
   @override
   _ResultState createState() => _ResultState();
@@ -407,6 +477,7 @@ class _ResultState extends State<Result> {
   }
 
   void onContinue() async {
+    print(widget.totalToken);
     if (widget.trophies.isNegative) {
       if (trophies <= 10) {
         widget.bloc.trophyEventSink.add(Decrement(trophy: trophies));
@@ -416,22 +487,21 @@ class _ResultState extends State<Result> {
         print("Substracted ${widget.trophies}");
       }
     } else {
-      widget.bloc.trophyEventSink
-          .add(Increment(trophy: widget.trophies + trophies));
+      widget.bloc.trophyEventSink.add(Increment(trophy: widget.trophies));
       print(
           "Added ${widget.trophies} trophi $trophies Tokens ${widget.tokens}");
     }
 
     print("Tokens ${widget.tokens}");
 
-    if (widget.tokens.isNegative) {
+    if (widget.totalToken.isNegative) {
       if (tokens <= 10) {
         widget.blocToken.tokenEventSink.add(DecrementToken(0));
       } else {
-        widget.blocToken.tokenEventSink.add(DecrementToken(widget.tokens));
+        widget.blocToken.tokenEventSink.add(IncrementToken(widget.totalToken));
       }
     } else {
-      widget.blocToken.tokenEventSink.add(IncrementToken(widget.tokens));
+      widget.blocToken.tokenEventSink.add(IncrementToken(widget.totalToken));
     }
 
     print("match Win = ${widget.isWin}");
@@ -444,7 +514,7 @@ class _ResultState extends State<Result> {
           "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
           "matchlosses":
               widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
-          "tokens": widget.tokens + tokens,
+          "tokens": widget.totalToken + tokens,
           "trophy": widget.prefs.getInt('trophy')
         };
 
@@ -452,7 +522,7 @@ class _ResultState extends State<Result> {
           if (statusCode == 200 || statusCode == 201) {
             Map<String, dynamic> _leaderboard = {
               "username": widget.prefs.getString('username'),
-              "tokens": widget.tokens + tokens,
+              "tokens": widget.totalToken + tokens,
               "trophy": widget.prefs.getInt('trophy')
             };
 
@@ -467,7 +537,7 @@ class _ResultState extends State<Result> {
           "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
           "matchlosses":
               widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
-          "tokens": widget.tokens + tokens,
+          "tokens": widget.totalToken + tokens,
           "trophy": widget.trophies + trophies
         };
 
@@ -475,7 +545,7 @@ class _ResultState extends State<Result> {
           if (statusCode == 200 || statusCode == 201) {
             Map<String, dynamic> _leaderboard = {
               "username": widget.prefs.getString('username'),
-              "tokens": widget.tokens + tokens,
+              "tokens": widget.totalToken + tokens,
               "trophy": widget.trophies + widget.prefs.getInt('trophy')
             };
 
@@ -491,7 +561,7 @@ class _ResultState extends State<Result> {
         "matchwins": widget.isWin == true ? matchwins + 1 : matchwins + 0,
         "matchlosses":
             widget.isWin == false ? matchlooses + 1 : matchlooses + 0,
-        "tokens": widget.tokens + tokens,
+        "tokens": widget.totalToken + tokens,
         "trophy": widget.trophies + trophies
       };
 
@@ -499,7 +569,7 @@ class _ResultState extends State<Result> {
         if (statusCode == 200 || statusCode == 201) {
           Map<String, dynamic> _leaderboard = {
             "username": widget.prefs.getString('username'),
-            "tokens": widget.tokens + tokens,
+            "tokens": widget.totalToken + tokens,
             "trophy": widget.trophies + widget.prefs.getInt('trophy')
           };
 
@@ -519,7 +589,7 @@ class _ResultState extends State<Result> {
         'matchwins', widget.isWin == true ? matchwins + 1 : matchwins + 0);
     await widget.prefs.setInt('matchlosses',
         widget.isWin == false ? matchlooses + 1 : matchlooses + 0);
-    await widget.prefs.setInt('tokens', widget.tokens + tokens);
+    await widget.prefs.setInt('tokens', widget.totalToken + tokens);
     await widget.prefs.setInt('trophy', trophy + widget.prefs.getInt('trophy'));
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:quiz_app/Authenticate/LoadingScreen.dart';
 import 'package:quiz_app/Dialoges/Dialoges.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/PageEvent.dart';
@@ -26,6 +27,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   BlocTrophy _bloc;
   BlocToken _blocToken;
   PageEvent _pageEvent;
+  int percentage = 0;
 
   @override
   void initState() {
@@ -37,25 +39,34 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     getRewardList().then((list) {
       setState(() {
         rewardList = list;
+        percentage = 25;
         print(list);
+
+        getLeaderboardFromServer().then((list) {
+          setState(() {
+            getLeaderboard = list;
+            percentage = 50;
+            print(list);
+
+            getEventsFromServer().then((list) {
+              setState(() {
+                eventsList = list;
+                percentage = 75;
+                Timer(Duration(seconds: 1), () {
+                  setState(() {
+                    isLoading = false;
+                  });
+                });
+              });
+              _blocToken = BlocToken()..initialize(prefs.getInt('tokens'));
+              _bloc = BlocTrophy()..initialize(prefs.getInt('trophy'));
+              if (prefs.getInt('tokens') <= 4) {
+                givenToken();
+              }
+            });
+          });
+        });
       });
-    });
-    getLeaderboardFromServer().then((list) {
-      setState(() {
-        getLeaderboard = list;
-        print(list);
-      });
-    });
-    getEventsFromServer().then((list) {
-      setState(() {
-        eventsList = list;
-        isLoading = false;
-      });
-      _blocToken = BlocToken()..initialize(prefs.getInt('tokens'));
-      _bloc = BlocTrophy()..initialize(prefs.getInt('trophy'));
-      if (prefs.getInt('tokens') <= 4) {
-        givenToken();
-      }
     });
   }
 
@@ -87,7 +98,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 builder: (BuildContext context) {
                   if (snapshot.data == 1) {
                     return isLoading == true
-                        ? Center(child: CircularProgressIndicator())
+                        ? LoadingScreen(
+                            percentage: percentage,
+                          )
                         : Game(
                             eventsList, _bloc, _blocToken, prefs, rewardList);
                   } else if (snapshot.data == 0) {
@@ -126,7 +139,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         //   ],
         // ),
 
-        floatingActionButton: eventsList == null
+        floatingActionButton: isLoading == true
             ? Container()
             : StreamBuilder(
                 stream: _pageEvent.boolState,

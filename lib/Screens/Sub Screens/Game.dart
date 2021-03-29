@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_app/Authenticate/Loading.dart';
 import 'package:quiz_app/Dialoges/Dialoges.dart';
-import 'package:quiz_app/Dialoges/LogoutDialog.dart';
 import 'package:quiz_app/Services/Const.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
@@ -88,8 +88,10 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                         Icons.logout,
                         color: Colors.white,
                       ),
-                      onPressed: () => showDialog(
-                          context: context, builder: (_) => LogoutDialog()),
+                      onPressed: () => Navigator.of(context)
+                          .push(MaterialPageRoute(builder: (_) => Loading())),
+                      // onPressed: () => showDialog(
+                      //     context: context, builder: (_) => LogoutDialog()),
                     ),
                   ),
                 ],
