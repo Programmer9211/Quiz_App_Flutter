@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:quiz_app/Authenticate/Loading.dart';
+
 import 'package:quiz_app/Dialoges/Dialoges.dart';
+import 'package:quiz_app/Dialoges/LogoutDialog.dart';
 import 'package:quiz_app/Services/Const.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
 import 'package:quiz_app/bloc/trophyEvent.dart';
@@ -60,7 +61,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
     return FadeTransition(
       opacity: animation,
       child: Container(
-        color: getColors[0],
+        color: getColors[1],
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -74,26 +75,26 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                   Text(
                     "Quiz Page",
                     style: TextStyle(
-                        fontSize: 28,
+                        fontSize: size.width / 16,
                         fontWeight: FontWeight.w500,
                         color: Colors.white),
                   ),
                   SizedBox(
                     width: size.width / 5.5,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.logout,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (_) => Loading())),
-                      // onPressed: () => showDialog(
-                      //     context: context, builder: (_) => LogoutDialog()),
+                  IconButton(
+                    icon: Icon(
+                      Icons.logout,
+                      color: Colors.white,
                     ),
+                    // onPressed: () => Navigator.of(context)
+                    //     .push(MaterialPageRoute(builder: (_) => Loading())),
+                    onPressed: () => showDialog(
+                        context: context, builder: (_) => LogoutDialog()),
                   ),
+                  SizedBox(
+                    width: size.width / 10,
+                  )
                 ],
               ),
             ),
@@ -103,7 +104,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
             Container(
               width: size.width,
               alignment: Alignment.center,
-              color: getColors[0],
+              color: getColors[1],
               child: header(size),
             ),
             SizedBox(
@@ -188,16 +189,26 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                 style: TextStyle(
                     color: Colors.purple,
                     fontWeight: FontWeight.w500,
-                    fontSize: 15),
+                    fontSize: size.width / 25.5),
               ),
             ),
             IconButton(
               onPressed: () => showDialog(
                   context: context,
-                  builder: (_) => Message(
-                        content: "This Feature Will Avalible Soon",
-                        title: "Under Devlopment",
-                      )),
+                  builder: (_) {
+                    if (widget.prefs.getInt("tokens") < 11) {
+                      return FreeTokens(
+                        prefs: widget.prefs,
+                        bloc: widget.blocToken,
+                      );
+                    } else {
+                      return Message(
+                        content:
+                            "You Already have ${widget.prefs.getInt('tokens')} Tokens",
+                        title: "More Tokens",
+                      );
+                    }
+                  }),
               icon: Icon(
                 Icons.arrow_forward,
                 color: Colors.purple,
@@ -268,7 +279,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                             "Event name : ${widget.newList[index]['name']}",
                             style: TextStyle(
                                 color: Colors.purple,
-                                fontSize: 18,
+                                fontSize: size.width / 24,
                                 fontWeight: FontWeight.w500),
                           ),
                           SizedBox(
@@ -282,8 +293,7 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                           SizedBox(
                             height: size.height / 200,
                           ),
-                          tokensRequired(size,
-                              "Reward : ${widget.newList[index]['token']}"),
+                          tokensRequired(size, "Reward: 12"),
                         ],
                       )),
                   SizedBox(),
@@ -293,7 +303,10 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                       color: getColors[1],
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)),
-                      child: Text("Play Now"),
+                      child: Text(
+                        "Play Now",
+                        style: TextStyle(fontSize: size.width / 26.5),
+                      ),
                       textColor: Colors.white,
                       onPressed: () {
                         if (widget.prefs.getInt('tokens') <
@@ -309,13 +322,13 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
                           showDialog(
                               context: context,
                               builder: (_) => PlayWarning(
-                                    widget.newList[index]['token'],
-                                    widget.newList[index]['name'],
-                                    widget.newList[index]['link'],
-                                    widget._bloc,
-                                    widget.blocToken,
-                                    widget.prefs,
-                                  ));
+                                  widget.newList[index]['token'],
+                                  widget.newList[index]['name'],
+                                  widget.newList[index]['link'],
+                                  widget._bloc,
+                                  widget.blocToken,
+                                  widget.prefs,
+                                  widget.newList[index]['imageUrl']));
                         }
                       },
                     ),
@@ -339,7 +352,9 @@ class _GameState extends State<Game> with TickerProviderStateMixin {
         Text(
           show,
           style: TextStyle(
-              color: Colors.purple, fontSize: 18, fontWeight: FontWeight.w600),
+              color: Colors.purple,
+              fontSize: size.width / 24,
+              fontWeight: FontWeight.w600),
         ),
         SizedBox(
           width: size.width / 100,

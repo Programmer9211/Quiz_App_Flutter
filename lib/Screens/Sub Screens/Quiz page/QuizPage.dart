@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/Authenticate/Loading.dart';
+import 'package:quiz_app/Dialoges/Dialoges.dart';
 import 'package:quiz_app/Services/Const.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
@@ -9,18 +10,20 @@ import 'package:quiz_app/bloc/trophyEvent.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class QuizPage extends StatefulWidget {
-  final String url, name;
+  final String url, name, imageurl;
   final BlocTrophy bloc;
   final BlocToken blocToken;
   final SharedPreferences prefs;
   final int chargeToken;
-  QuizPage(
-      {this.bloc,
-      this.url,
-      this.name,
-      this.blocToken,
-      this.prefs,
-      this.chargeToken});
+  QuizPage({
+    this.bloc,
+    this.url,
+    this.name,
+    this.blocToken,
+    this.prefs,
+    this.chargeToken,
+    this.imageurl,
+  });
   @override
   _QuizPageState createState() => _QuizPageState();
 }
@@ -38,8 +41,9 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
   Timer timer;
   int hintfee = 0;
   Color bulbColor = Colors.white;
+  bool isHintTaken = false;
 
-  AnimationController _controller, _hintAnimation;
+  AnimationController _controller, _hintAnimation, _timerController;
 
   @override
   void initState() {
@@ -53,8 +57,12 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
     _hintAnimation =
         AnimationController(vsync: this, duration: Duration(milliseconds: 500));
 
+    _timerController =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+
     _controller.forward();
     _hintAnimation.forward();
+    _timerController.forward();
 
     super.initState();
     isLoading = true;
@@ -101,6 +109,10 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
           _controller.forward();
         }
       }
+      if (sec <= 10) {
+        _timerController.reset();
+        _timerController.forward();
+      }
     });
   }
 
@@ -113,6 +125,10 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
         colors[3] = Colors.white;
       });
     }
+
+    setState(() {
+      isHintTaken = false;
+    });
 
     if (answer == correctAnswer[counter]) {
       print("Correct anwer");
@@ -217,33 +233,60 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
     }
   }
 
-  void onHint() {
-    _hintAnimation.reset();
-    bulbColor = Colors.yellow;
-    setState(() {});
-    _hintAnimation.forward();
-    Timer(Duration(milliseconds: 500), () {
-      setState(() {
-        bulbColor = Colors.white;
-      });
-    });
+  void onHint() async {
+    if (widget.prefs.getBool('firsttime') == false) {
+      showDialog(
+        context: context,
+        builder: (context) => Message(
+          title: "Alert",
+          content: "Hint will charge 3 tokens on per question.",
+        ),
+      );
 
-    if (answerList[counter][0] == correctAnswer[counter]) {
-      colors[0] = Colors.green;
+      await widget.prefs.setBool('firsttime', true);
+    } else {
+      _hintAnimation.reset();
+      bulbColor = Colors.yellow;
       setState(() {});
-    } else if (answerList[counter][1] == correctAnswer[counter]) {
-      colors[1] = Colors.green;
-      setState(() {});
-    } else if (answerList[counter][2] == correctAnswer[counter]) {
-      colors[2] = Colors.green;
-      setState(() {});
-    } else if (answerList[counter][3] == correctAnswer[counter]) {
-      colors[3] = Colors.green;
-      setState(() {});
+      _hintAnimation.forward();
+      Timer(Duration(milliseconds: 500), () {
+        setState(() {
+          bulbColor = Colors.white;
+        });
+      });
+
+      if ((widget.prefs.getInt('tokens') - hintfee) <= 3) {
+        showDialog(
+          context: context,
+          builder: (context) => Message(
+            title: "Tokens",
+            content: "Dont't have enough tokens :(",
+          ),
+        );
+      } else {
+        if (isHintTaken == false) {
+          if (answerList[counter][0] == correctAnswer[counter]) {
+            colors[0] = Colors.green;
+            setState(() {});
+          } else if (answerList[counter][1] == correctAnswer[counter]) {
+            colors[1] = Colors.green;
+            setState(() {});
+          } else if (answerList[counter][2] == correctAnswer[counter]) {
+            colors[2] = Colors.green;
+            setState(() {});
+          } else if (answerList[counter][3] == correctAnswer[counter]) {
+            colors[3] = Colors.green;
+            setState(() {});
+          }
+          setState(() {
+            hintfee = hintfee + 3;
+            isHintTaken = true;
+          });
+        }
+      }
     }
-    setState(() {
-      hintfee = hintfee + 3;
-    });
+    // _timerController.reset();
+    // _timerController.forward();
   }
 
   @override
@@ -253,9 +296,16 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
         Tween(begin: Offset(1.0, 0.0), end: Offset.zero).animate(_controller);
     final hintAnimation =
         Tween<double>(begin: 2.0, end: 1.0).animate(_hintAnimation);
+    final timerAnimation =
+        Tween<double>(begin: 1.8, end: 1.0).animate(_timerController);
 
     return isLoading == true
-        ? Loading()
+        ? Loading(
+            text: widget.name,
+            reward: "12",
+            charge: widget.chargeToken.toString(),
+            image: widget.imageurl,
+          )
         : Scaffold(
             body: Container(
               height: size.height,
@@ -282,7 +332,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                         Text(
                           "Quiz Page",
                           style: TextStyle(
-                              fontSize: 28,
+                              fontSize: size.width / 16,
                               fontWeight: FontWeight.w500,
                               color: Colors.white),
                         ),
@@ -292,7 +342,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                             child: AnimatedBuilder(
                               animation: hintAnimation,
                               child: Icon(Icons.lightbulb,
-                                  color: bulbColor, size: 35),
+                                  color: bulbColor, size: size.width / 14),
                               builder: (BuildContext context, Widget child) {
                                 return ScaleTransition(
                                   scale: hintAnimation,
@@ -304,17 +354,24 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
                     ),
                   ),
                   Container(
-                    height: size.height / 7,
-                    width: size.width,
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Time Left : $sec sec",
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white),
-                    ),
-                  ),
+                      height: size.height / 7,
+                      width: size.width,
+                      alignment: Alignment.center,
+                      child: AnimatedBuilder(
+                          animation: timerAnimation,
+                          child: Text(
+                            sec == 1 ? "Time Up" : "Time Left : $sec sec",
+                            style: TextStyle(
+                                fontSize: size.width / 19,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white),
+                          ),
+                          builder: (context, child) {
+                            return ScaleTransition(
+                              scale: timerAnimation,
+                              child: child,
+                            );
+                          })),
                   AnimatedBuilder(
                     animation: animation,
                     child: requiredchild(size),
@@ -346,7 +403,9 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
           child: Text(
             "Ques ${counter + 1}:  ${questionList[counter]}",
             style: TextStyle(
-                fontSize: 22, fontWeight: FontWeight.w500, color: Colors.white),
+                fontSize: size.width / 20,
+                fontWeight: FontWeight.w500,
+                color: Colors.white),
           ),
         ),
         SizedBox(
@@ -363,7 +422,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
             onTap: () => checkAnswer(answerList[counter][0]),
             child: Text("a  ${answerList[counter][0]}.",
                 style: TextStyle(
-                    fontSize: 22,
+                    fontSize: size.width / 20,
                     fontWeight: FontWeight.w500,
                     color: colors[0])),
           ),
@@ -379,7 +438,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
             onTap: () => checkAnswer(answerList[counter][1]),
             child: Text("b  ${answerList[counter][1]}.",
                 style: TextStyle(
-                    fontSize: 22,
+                    fontSize: size.width / 20,
                     fontWeight: FontWeight.w500,
                     color: colors[1])),
           ),
@@ -395,7 +454,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
             onTap: () => checkAnswer(answerList[counter][2]),
             child: Text("c  ${answerList[counter][2]}.",
                 style: TextStyle(
-                    fontSize: 22,
+                    fontSize: size.width / 20,
                     fontWeight: FontWeight.w500,
                     color: colors[2])),
           ),
@@ -411,7 +470,7 @@ class _QuizPageState extends State<QuizPage> with TickerProviderStateMixin {
             onTap: () => checkAnswer(answerList[counter][3]),
             child: Text("d  ${answerList[counter][3]}.",
                 style: TextStyle(
-                    fontSize: 22,
+                    fontSize: size.width / 20,
                     fontWeight: FontWeight.w500,
                     color: colors[3])),
           ),
@@ -479,7 +538,7 @@ class _ResultState extends State<Result> {
   void onContinue() async {
     print(widget.totalToken);
     if (widget.trophies.isNegative) {
-      if (trophies <= 10) {
+      if (trophies <= 15) {
         widget.bloc.trophyEventSink.add(Decrement(trophy: trophies));
         print("No Trophy Substracted Substracted");
       } else {
@@ -495,7 +554,7 @@ class _ResultState extends State<Result> {
     print("Tokens ${widget.tokens}");
 
     if (widget.totalToken.isNegative) {
-      if (tokens <= 10) {
+      if (tokens <= 15) {
         widget.blocToken.tokenEventSink.add(DecrementToken(0));
       } else {
         widget.blocToken.tokenEventSink.add(IncrementToken(widget.totalToken));
@@ -507,7 +566,7 @@ class _ResultState extends State<Result> {
     print("match Win = ${widget.isWin}");
 
     if (widget.trophies.isNegative) {
-      if (trophies <= 10) {
+      if (trophies <= 15) {
         print(":) $trophies");
         Map<String, dynamic> map = {
           "matchplayed": matchplayed + 1,
@@ -603,7 +662,7 @@ class _ResultState extends State<Result> {
         onContinue();
       },
       child: Scaffold(
-        backgroundColor: getColors[0],
+        backgroundColor: getColors[1],
         body: Column(
           children: [
             SizedBox(

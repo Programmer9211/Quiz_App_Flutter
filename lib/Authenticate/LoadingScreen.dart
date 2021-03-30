@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quiz_app/Services/Const.dart';
 
 class LoadingScreen extends StatefulWidget {
-  int percentage;
+  final int percentage;
   LoadingScreen({this.percentage});
   @override
   _LoadingScreenState createState() => _LoadingScreenState();
@@ -63,28 +63,36 @@ class _LoadingScreenState extends State<LoadingScreen>
               Text(
                 "Quiz App",
                 style: TextStyle(
-                    fontSize: 32,
+                    fontSize: size.width / 12.5,
                     color: Colors.white,
                     fontWeight: FontWeight.w500),
               ),
               SizedBox(
-                height: size.height / 2.7,
+                height: size.height / 15,
+              ),
+              Container(
+                height: size.height / 3.3,
+                width: size.width / 1.1,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  image: DecorationImage(
+                    image: AssetImage('assets/quiz.jpg'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: size.height / 15,
               ),
               AnimatedBuilder(
                   animation: animation,
-                  child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          ishalf = true;
-                        });
-                      },
-                      child: Container(
-                        height: size.height / 8,
-                        width: size.height / 8,
-                        decoration: BoxDecoration(
-                            image: DecorationImage(
-                                image: AssetImage('assets/q.png'))),
-                      )),
+                  child: Container(
+                    height: size.height / 8,
+                    width: size.height / 8,
+                    decoration: BoxDecoration(
+                        image:
+                            DecorationImage(image: AssetImage('assets/q.png'))),
+                  ),
                   builder: (context, child) {
                     return RotationTransition(
                       turns: animation,
@@ -92,7 +100,17 @@ class _LoadingScreenState extends State<LoadingScreen>
                     );
                   }),
               SizedBox(
-                height: size.height / 4,
+                height: size.height / 10,
+              ),
+              Text(
+                "Connecting to Server...",
+                style: TextStyle(
+                    fontSize: size.width / 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500),
+              ),
+              SizedBox(
+                height: size.height / 40,
               ),
               Container(
                 alignment: widget.percentage == 75
@@ -106,7 +124,10 @@ class _LoadingScreenState extends State<LoadingScreen>
                     border: Border.all(width: 1.0, color: Colors.black)),
                 child: Container(
                   height: size.height / 25,
-                  color: widget.percentage == 75 ? getColors[3] : getColors[1],
+                  decoration: BoxDecoration(
+                    color:
+                        widget.percentage == 75 ? getColors[3] : getColors[1],
+                  ),
                   width: indicator(),
                 ),
               ),
@@ -114,7 +135,10 @@ class _LoadingScreenState extends State<LoadingScreen>
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: Text(
                   "    ${widget.percentage}%\nLoading...",
-                  style: TextStyle(fontSize: 20, color: Colors.white),
+                  style: TextStyle(
+                      fontSize: size.width / 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500),
                 ),
               ),
             ],

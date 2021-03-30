@@ -208,51 +208,63 @@ class _ButtonsState extends State<Buttons> with SingleTickerProviderStateMixin {
           scale: animation,
           child: Column(
             children: [
-              FloatingActionButton(
-                tooltip: "LeaderBoard",
-                child: Icon(Icons.analytics_outlined),
-                onPressed: () {
-                  widget.pageEvent.pageIndex.add(0);
-                  widget.pageEvent.getBool.add(true);
-                },
-              ),
-              SizedBox(
-                height: size.height / 50,
-              ),
-              FloatingActionButton(
-                tooltip: "Games",
-                child: Icon(Icons.gamepad),
-                onPressed: () {
-                  widget.pageEvent.pageIndex.add(1);
-                  widget.pageEvent.getBool.add(true);
-                },
-              ),
-              SizedBox(
-                height: size.height / 50,
-              ),
-              FloatingActionButton(
-                  tooltip: "Profile",
-                  child: Icon(Icons.account_box_outlined),
+              Container(
+                height: size.height / 14,
+                child: FloatingActionButton(
+                  tooltip: "LeaderBoard",
+                  child: Icon(Icons.analytics_outlined),
                   onPressed: () {
-                    widget.pageEvent.pageIndex.add(2);
+                    widget.pageEvent.pageIndex.add(0);
                     widget.pageEvent.getBool.add(true);
-                  }),
+                  },
+                ),
+              ),
               SizedBox(
                 height: size.height / 50,
               ),
-              FloatingActionButton(
-                tooltip: "Close",
-                child: Icon(
-                  Icons.close,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  controller.reverse();
-
-                  Timer(Duration(milliseconds: 500), () {
+              Container(
+                height: size.height / 14,
+                child: FloatingActionButton(
+                  tooltip: "Games",
+                  child: Icon(Icons.gamepad),
+                  onPressed: () {
+                    widget.pageEvent.pageIndex.add(1);
                     widget.pageEvent.getBool.add(true);
-                  });
-                },
+                  },
+                ),
+              ),
+              SizedBox(
+                height: size.height / 50,
+              ),
+              Container(
+                height: size.height / 14,
+                child: FloatingActionButton(
+                    tooltip: "Profile",
+                    child: Icon(Icons.account_box_outlined),
+                    onPressed: () {
+                      widget.pageEvent.pageIndex.add(2);
+                      widget.pageEvent.getBool.add(true);
+                    }),
+              ),
+              SizedBox(
+                height: size.height / 50,
+              ),
+              Container(
+                height: size.height / 14,
+                child: FloatingActionButton(
+                  tooltip: "Close",
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    controller.reverse();
+
+                    Timer(Duration(milliseconds: 500), () {
+                      widget.pageEvent.getBool.add(true);
+                    });
+                  },
+                ),
               ),
             ],
           ),

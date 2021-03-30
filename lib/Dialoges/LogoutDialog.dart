@@ -51,7 +51,7 @@ class _LogoutDialogState extends State<LogoutDialog>
           FlatButton(
             textColor: Colors.white,
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
+            child: Text("No"),
           ),
           FlatButton(
             textColor: Colors.white,
@@ -59,7 +59,7 @@ class _LogoutDialogState extends State<LogoutDialog>
               Navigator.pop(context);
               logout(context);
             },
-            child: Text("Play"),
+            child: Text("Yes"),
           ),
         ],
       ),

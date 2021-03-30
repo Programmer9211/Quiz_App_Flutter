@@ -42,7 +42,7 @@ class WelcomeScreen extends StatelessWidget {
             child: Text(
               "Welcome to Quiz App",
               style: TextStyle(
-                fontSize: 30,
+                fontSize: size.width / 16,
                 fontWeight: FontWeight.w800,
               ),
             ),
@@ -56,7 +56,7 @@ class WelcomeScreen extends StatelessWidget {
             child: Text(
               "Where you can play awsome quiz \n                and win rewards ",
               style: TextStyle(
-                  fontSize: 18,
+                  fontSize: size.width / 23,
                   fontWeight: FontWeight.w500,
                   color: Color.fromRGBO(14, 176, 197, 1)),
             ),
@@ -99,10 +99,10 @@ class WelcomeScreen extends StatelessWidget {
           child: Text(
             title,
             style: TextStyle(
-                fontSize: 20,
-                color: Colors.white,
-                //color: color == Colors.blue ? Colors.white : Colors.black,
-                fontWeight: FontWeight.w500),
+              fontSize: size.width / 22,
+              color: Colors.white,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),

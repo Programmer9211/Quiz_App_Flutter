@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:quiz_app/Screens/Sub%20Screens/Game.dart';
+import 'package:quiz_app/Screens/Sub%20Screens/Profile.dart';
 import 'package:quiz_app/Screens/Sub%20Screens/Quiz%20page/QuizPage.dart';
 import 'package:quiz_app/Services/Network.dart';
 import 'package:quiz_app/bloc/tokenEvent.dart';
@@ -13,10 +14,10 @@ class PlayWarning extends StatefulWidget {
   final int chargeToken;
   final BlocTrophy bloc;
   final BlocToken blocToken;
-  final String name, url;
+  final String name, url, imageurl;
   final SharedPreferences prefs;
   PlayWarning(this.chargeToken, this.name, this.url, this.bloc, this.blocToken,
-      this.prefs);
+      this.prefs, this.imageurl);
 
   @override
   _PlayWarningState createState() => _PlayWarningState();
@@ -86,11 +87,14 @@ class _PlayWarningState extends State<PlayWarning>
               Navigator.pop(context);
 
               Navigator.of(context).push(RouteToPage(QuizPage(
-                  bloc: widget.bloc,
-                  blocToken: widget.blocToken,
-                  url: widget.url,
-                  prefs: widget.prefs,
-                  chargeToken: widget.chargeToken)));
+                bloc: widget.bloc,
+                name: widget.name,
+                blocToken: widget.blocToken,
+                url: widget.url,
+                prefs: widget.prefs,
+                chargeToken: widget.chargeToken,
+                imageurl: widget.imageurl,
+              )));
             },
             child: Text("Play"),
           ),
@@ -137,7 +141,9 @@ class _FreeTokensState extends State<FreeTokens>
   void onPressed() async {
     String username = widget.prefs.getString('username');
 
-    await widget.prefs.setInt('tokens', 25).then((_) {
+    await widget.prefs
+        .setInt('tokens', 25 + widget.prefs.getInt('tokens'))
+        .then((_) {
       Map<String, dynamic> map = {
         "matchplayed": widget.prefs.getInt('matchplayed'),
         "matchwins": widget.prefs.getInt('matchwins'),
@@ -149,7 +155,7 @@ class _FreeTokensState extends State<FreeTokens>
       Map<String, dynamic> _leaderboardMap = {
         "username": username,
         "tokens": widget.prefs.getInt('tokens'),
-        "trophy": 0
+        "trophy": widget.prefs.getInt('trophy')
       };
 
       widget.bloc.tokenEventSink.add(IncrementToken(25));
@@ -260,6 +266,79 @@ class _MessageCountState extends State<Message>
               Navigator.pop(context);
             },
             child: Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ViewProfile extends StatefulWidget {
+  final String name;
+  ViewProfile({this.name});
+
+  @override
+  _ViewProfileState createState() => _ViewProfileState();
+}
+
+class _ViewProfileState extends State<ViewProfile>
+    with SingleTickerProviderStateMixin {
+  Animation animation;
+  AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
+
+    final CurvedAnimation curvedAnimation =
+        CurvedAnimation(curve: Curves.fastOutSlowIn, parent: controller);
+
+    animation = Tween<double>(begin: 0.0, end: 1.0).animate(curvedAnimation);
+
+    controller.addListener(() {
+      setState(() {});
+    });
+
+    controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: animation,
+      child: AlertDialog(
+        backgroundColor: Colors.amber,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          widget.name,
+          style: TextStyle(
+              color: Colors.white, fontSize: 22, fontWeight: FontWeight.w500),
+        ),
+        content: Text("Want to view profile of ${widget.name}",
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500)),
+        actions: [
+          FlatButton(
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("No"),
+          ),
+          FlatButton(
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.of(context)
+                  .push(RouteToPage(ProfileFromLeaderBoard(
+                    username: widget.name,
+                  )))
+                  .then((value) => Navigator.pop(context));
+            },
+            child: Text("Yes"),
           ),
         ],
       ),
